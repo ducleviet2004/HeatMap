@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "route-deviation-api"
+version = "0.1.0"
+description = "Foundation API for Route Deviation Heatmap Analytics"
+requires-python = ">=3.12"
+dependencies = [
+  "alembic==1.14.1",
+  "fastapi==0.115.8",
+  "geoalchemy2==0.17.0",
+  "httpx==0.28.1",
+  "psycopg[binary]==3.2.4",
+  "pydantic-settings==2.7.1",
+  "redis==5.2.1",
+  "sqlalchemy==2.0.38",
+  "uvicorn[standard]==0.34.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy==1.15.0",
+  "pytest==8.3.4",
+  "pytest-asyncio==0.25.3",
+  "ruff==0.9.7",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+exclude = ["migrations"]
