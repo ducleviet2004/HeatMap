@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 
 from geoalchemy2.shape import from_shape
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, Point  # type: ignore[import-untyped]
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -30,9 +30,9 @@ def seed_database_from_json(session: Session, json_path: Path = SEED_JSON_PATH) 
     # 1. Seed Drivers
     driver_count = 0
     for d in data.get("drivers", []):
-        stmt = select(Driver).where(Driver.id == d["id"])
-        existing = session.scalar(stmt)
-        if not existing:
+        stmt_driver = select(Driver).where(Driver.id == d["id"])
+        existing_driver = session.scalar(stmt_driver)
+        if not existing_driver:
             session.add(
                 Driver(id=d["id"], full_name=d["full_name"], phone_number=d["phone_number"])
             )
@@ -43,9 +43,9 @@ def seed_database_from_json(session: Session, json_path: Path = SEED_JSON_PATH) 
     # 2. Seed Trips
     trip_count = 0
     for t in data.get("trips", []):
-        stmt = select(Trip).where(Trip.id == t["id"])
-        existing = session.scalar(stmt)
-        if not existing:
+        stmt_trip = select(Trip).where(Trip.id == t["id"])
+        existing_trip = session.scalar(stmt_trip)
+        if not existing_trip:
             session.add(Trip(id=t["id"], driver_id=t["driver_id"], status=t["status"]))
             trip_count += 1
 
@@ -54,9 +54,9 @@ def seed_database_from_json(session: Session, json_path: Path = SEED_JSON_PATH) 
     # 3. Seed Planned Routes
     route_count = 0
     for r in data.get("planned_routes", []):
-        stmt = select(PlannedRoute).where(PlannedRoute.id == r["id"])
-        existing = session.scalar(stmt)
-        if not existing:
+        stmt_route = select(PlannedRoute).where(PlannedRoute.id == r["id"])
+        existing_route = session.scalar(stmt_route)
+        if not existing_route:
             coords = r["route_geometry"]["coordinates"]
             line = LineString(coords)
             session.add(
