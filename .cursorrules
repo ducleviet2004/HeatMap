@@ -1,0 +1,10 @@
+# Route Deviation Heatmap Analytics System (PRD V4) — Cursor Rules
+
+- ALWAYS before starting ANY new task, MUST pull/merge latest code from `develop` into personal branch (`git fetch origin && git merge origin/develop`).
+- STRICTLY push code ONLY to your own personal branch (`git push origin Doan` for Nguyễn Văn Đoan, `Sang` for Nguyễn Văn Sáng, `Viet` for Lê Việt). NEVER push directly to main or other branches.
+- MUST run `ruff format backend/` and `ruff check backend/` before committing python code.
+- MUST run `npx prettier --write frontend/` and `npm run lint` before committing frontend code.
+- MUST run unit tests (`pytest` and `vitest`) to verify 100% pass rate before completing a task.
+- ALWAYS use WGS84 EPSG:4326 for spatial geometries (Point, LineString) in PostGIS.
+- ALWAYS commit and push code to personal git remote branch right after completing each task.
+- Update Google Sheet task status to 'Hoàn thành' (100%) upon task completion.
