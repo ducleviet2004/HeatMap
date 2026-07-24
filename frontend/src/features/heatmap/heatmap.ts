@@ -3,11 +3,12 @@ import type { HeatmapFeature } from "../../api/client";
 export interface H3Cell {
   hexId: string;
   resolution: number;
-  bypassVolume: number;
+  bypassTripCount: number;
+  center: [number, number] | null;
 }
 
 export function toH3Cells(features: HeatmapFeature[]): H3Cell[] {
-  // Chuyen API GeoJSON feature thanh data format ma Deck.gl H3 layer can.
+  // Tao mot data model dung chung cho ca H3 Grid va Heat Blur.
   return features.flatMap((feature) => {
     const { hex_id, h3_resolution, bypass_trip_count, heat_weight } =
       feature.properties;
@@ -17,10 +18,35 @@ export function toH3Cells(features: HeatmapFeature[]): H3Cell[] {
       {
         hexId: hex_id,
         resolution: h3_resolution,
-        bypassVolume: bypass_trip_count ?? heat_weight,
+        bypassTripCount: bypass_trip_count ?? heat_weight,
+        center: polygonCenter(feature.geometry.coordinates[0]),
       },
     ];
   });
+}
+
+export function polygonCenter(
+  ring: number[][] | undefined,
+): [number, number] | null {
+  if (!ring?.length) return null;
+
+  // API tra H3 Polygon; center duoc dung lam input point cho MapLibre Heatmap.
+  const uniquePoints =
+    ring.length > 1 &&
+    ring[0][0] === ring[ring.length - 1][0] &&
+    ring[0][1] === ring[ring.length - 1][1]
+      ? ring.slice(0, -1)
+      : ring;
+  if (!uniquePoints.length) return null;
+
+  const [longitude, latitude] = uniquePoints.reduce(
+    ([longitudeSum, latitudeSum], point) => [
+      longitudeSum + point[0],
+      latitudeSum + point[1],
+    ],
+    [0, 0],
+  );
+  return [longitude / uniquePoints.length, latitude / uniquePoints.length];
 }
 
 export function volumeColor(

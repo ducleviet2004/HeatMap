@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { heatmapApi } from "../../api/client";
-import { HeatmapMap } from "./HeatmapMap";
+import { HeatmapMap, type HeatmapViewMode } from "./HeatmapMap";
 import { toH3Cells, type H3Cell } from "./heatmap";
 
 export function HeatmapPage() {
@@ -15,11 +15,19 @@ export function HeatmapPage() {
     [query.data],
   );
   const [hoveredCell, setHoveredCell] = useState<H3Cell | null>(null);
+  const [viewMode, setViewMode] = useState<HeatmapViewMode>("h3-grid");
   const handleHover = useCallback(
     (cell: H3Cell | null) => setHoveredCell(cell),
     [],
   );
-  const totalVolume = cells.reduce((sum, cell) => sum + cell.bypassVolume, 0);
+  const handleViewMode = useCallback((mode: HeatmapViewMode) => {
+    setViewMode(mode);
+    setHoveredCell(null);
+  }, []);
+  const totalVolume = cells.reduce(
+    (sum, cell) => sum + cell.bypassTripCount,
+    0,
+  );
   const resolutions = [...new Set(cells.map((cell) => cell.resolution))].sort();
 
   return (
@@ -49,6 +57,27 @@ export function HeatmapPage() {
             Mỗi ô H3 thể hiện số chuyến đi đã bypass đoạn đường tương ứng. Màu
             càng đậm, volume bypass càng cao.
           </p>
+
+          <div className="map-view-toggle" aria-label="Che do hien thi ban do">
+            <button
+              className={viewMode === "h3-grid" ? "is-active" : undefined}
+              type="button"
+              aria-pressed={viewMode === "h3-grid"}
+              onClick={() => handleViewMode("h3-grid")}
+            >
+              <span>H3 GRID</span>
+              <small>Polygon detail</small>
+            </button>
+            <button
+              className={viewMode === "heat-blur" ? "is-active" : undefined}
+              type="button"
+              aria-pressed={viewMode === "heat-blur"}
+              onClick={() => handleViewMode("heat-blur")}
+            >
+              <span>HEAT BLUR</span>
+              <small>Density overview</small>
+            </button>
+          </div>
 
           <div className="map-metrics">
             <article>
@@ -103,16 +132,17 @@ export function HeatmapPage() {
               </div>
               <div>
                 <dt>Bypass trips</dt>
-                <dd>{hoveredCell.bypassVolume}</dd>
+                <dd>{hoveredCell.bypassTripCount}</dd>
               </div>
             </dl>
           )}
         </aside>
 
         <section className="map-stage">
-          <HeatmapMap cells={cells} onHover={handleHover} />
+          <HeatmapMap cells={cells} viewMode={viewMode} onHover={handleHover} />
           <div className="map-stage__label">
-            LIVE H3 SURFACE · AUTO REFRESH 30S
+            {viewMode === "h3-grid" ? "H3 POLYGON VIEW" : "HEAT BLUR OVERVIEW"}
+            {" · "}AUTO REFRESH 30S
           </div>
         </section>
       </main>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { HeatmapFeature } from "../../api/client";
-import { toH3Cells, volumeColor } from "./heatmap";
+import { polygonCenter, toH3Cells, volumeColor } from "./heatmap";
 
 describe("toH3Cells", () => {
   it("maps API heat weight to an H3 bypass volume", () => {
@@ -9,14 +9,31 @@ describe("toH3Cells", () => {
       properties: {
         hex_id: "8965b56642fffff",
         h3_resolution: 9,
+        bypass_trip_count: 7,
         heat_weight: 12,
         display_weight: 2.56,
       },
-      geometry: { type: "Polygon", coordinates: [] },
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [105, 21],
+            [107, 21],
+            [107, 23],
+            [105, 23],
+            [105, 21],
+          ],
+        ],
+      },
     };
 
     expect(toH3Cells([feature])).toEqual([
-      { hexId: "8965b56642fffff", resolution: 9, bypassVolume: 12 },
+      {
+        hexId: "8965b56642fffff",
+        resolution: 9,
+        bypassTripCount: 7,
+        center: [106, 22],
+      },
     ]);
   });
 
@@ -28,6 +45,20 @@ describe("toH3Cells", () => {
     } satisfies HeatmapFeature;
 
     expect(toH3Cells([feature])).toEqual([]);
+  });
+});
+
+describe("polygonCenter", () => {
+  it("does not count the duplicated closing coordinate twice", () => {
+    expect(
+      polygonCenter([
+        [0, 0],
+        [2, 0],
+        [2, 2],
+        [0, 2],
+        [0, 0],
+      ]),
+    ).toEqual([1, 1]);
   });
 });
 
