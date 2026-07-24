@@ -285,6 +285,189 @@ footer {
   padding-top: 15vh;
 }
 
+.map-page {
+  min-height: 100vh;
+  background: #07100d;
+}
+.map-header {
+  height: 72px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #243a31;
+}
+.map-nav {
+  display: flex;
+  gap: 24px;
+  color: #71887d;
+  font: 500 11px "DM Mono";
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.map-nav a {
+  padding: 26px 0 23px;
+}
+.map-nav__active {
+  color: #62e5a4;
+  border-bottom: 2px solid #62e5a4;
+}
+.map-workspace {
+  max-width: none;
+  height: calc(100vh - 72px);
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(320px, 390px) 1fr;
+}
+.map-panel {
+  position: relative;
+  z-index: 2;
+  padding: 48px 32px;
+  overflow-y: auto;
+  border-right: 1px solid #294037;
+  background:
+    radial-gradient(circle at 0 0, rgba(63, 210, 139, 0.09), transparent 22rem),
+    #091712;
+}
+.map-panel h1 {
+  font-size: clamp(42px, 4vw, 64px);
+}
+.map-description {
+  margin: 28px 0 36px;
+  color: #91a89d;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.map-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid #294037;
+  border-left: 1px solid #294037;
+}
+.map-metrics article {
+  min-height: 92px;
+  padding: 16px;
+  border-right: 1px solid #294037;
+  border-bottom: 1px solid #294037;
+}
+.map-metrics article:last-child {
+  grid-column: 1 / -1;
+}
+.map-metrics span,
+.map-metrics strong {
+  display: block;
+  font-family: "DM Mono";
+}
+.map-metrics span {
+  color: #647c71;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.map-metrics strong {
+  margin-top: 12px;
+  color: #e6f2eb;
+  font-size: 20px;
+}
+.map-legend {
+  margin-top: 32px;
+}
+.map-legend > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #71887d;
+  font: 500 9px "DM Mono";
+  letter-spacing: 0.1em;
+}
+.map-legend__scale {
+  height: 8px;
+  background: linear-gradient(90deg, #ffbe48, #f68735, #eb4125);
+}
+.map-message {
+  margin-top: 28px;
+  padding: 16px;
+  color: #8da398;
+  border: 1px solid #294037;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.map-message--error {
+  color: #ffaaa4;
+  border-color: #713b38;
+}
+.map-message button {
+  display: block;
+  margin-top: 12px;
+  padding: 7px 10px;
+  color: inherit;
+  border: 1px solid currentColor;
+  background: transparent;
+  cursor: pointer;
+}
+.hex-inspector {
+  margin-top: 28px;
+  padding: 4px 16px;
+  border-left: 2px solid #ff8d38;
+  background: rgba(255, 130, 48, 0.06);
+}
+.hex-inspector div {
+  padding: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #2b3b34;
+}
+.hex-inspector div:last-child {
+  border-bottom: 0;
+}
+.hex-inspector dt {
+  color: #73897f;
+  font-size: 11px;
+}
+.hex-inspector dd {
+  margin: 0;
+  max-width: 190px;
+  overflow: hidden;
+  color: #e8efe8;
+  font: 500 11px "DM Mono";
+  text-overflow: ellipsis;
+}
+.map-stage {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: #10231d;
+}
+.heatmap-canvas {
+  position: absolute;
+  inset: 0;
+}
+.map-stage__label {
+  position: absolute;
+  z-index: 1;
+  top: 20px;
+  right: 20px;
+  padding: 8px 10px;
+  color: #b8c9bf;
+  border: 1px solid rgba(184, 201, 191, 0.35);
+  background: rgba(7, 16, 13, 0.78);
+  font: 500 9px "DM Mono";
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+.maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid #385047;
+  border-radius: 0;
+  background: #0b1814;
+}
+.maplibregl-ctrl-group button + button {
+  border-color: #385047;
+}
+.maplibregl-ctrl button .maplibregl-ctrl-icon {
+  filter: invert(1);
+}
+
 @media (max-width: 900px) {
   .hero {
     grid-template-columns: 1fr;
@@ -295,6 +478,17 @@ footer {
   }
   .lower-grid {
     grid-template-columns: 1fr;
+  }
+  .map-workspace {
+    height: auto;
+    grid-template-columns: 1fr;
+  }
+  .map-panel {
+    border-right: 0;
+    border-bottom: 1px solid #294037;
+  }
+  .map-stage {
+    min-height: 68vh;
   }
 }
 @media (max-width: 560px) {
@@ -312,5 +506,17 @@ footer {
   footer {
     gap: 16px;
     flex-direction: column;
+  }
+  .map-header {
+    padding-inline: 18px;
+  }
+  .map-header .brand > span:last-child {
+    display: none;
+  }
+  .map-nav {
+    gap: 14px;
+  }
+  .map-panel {
+    padding: 36px 18px;
   }
 }
