@@ -1,5 +1,5 @@
 import logging
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
@@ -8,6 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException
+from starlette.responses import Response
 
 from app.adapters.osrm import OsrmClient
 from app.adapters.redis_streams import RedisStreams
@@ -56,12 +57,14 @@ app.include_router(planned_routes.router, prefix="/api/v1")
 
 
 @app.middleware("http")
-async def correlation_id(request: Request, call_next: object) -> JSONResponse:
+async def correlation_id(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     request_id = request.headers.get("X-Correlation-ID", str(uuid4()))
     request.state.correlation_id = request_id
-    response = await call_next(request)  # type: ignore[operator]
+    response = await call_next(request)
     response.headers["X-Correlation-ID"] = request_id
-    return response  # type: ignore[no-any-return]
+    return response
 
 
 @app.exception_handler(RequestValidationError)

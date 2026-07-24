@@ -1,3 +1,4 @@
+from typing import cast
 from uuid import UUID
 
 from geoalchemy2 import WKBElement
@@ -50,6 +51,6 @@ class PlannedRouteRepository:
 
     @staticmethod
     def wkb_to_geojson(wkb_elem: object) -> GeoJsonLineString:
-        geom = to_shape(wkb_elem)  # type: ignore[arg-type]
+        geom = to_shape(cast(WKBElement, wkb_elem))
         coords = mapping(geom)["coordinates"]
         return GeoJsonLineString(coordinates=coords)

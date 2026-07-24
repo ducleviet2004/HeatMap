@@ -1,6 +1,4 @@
-"""OSRM Async Client Adapter for Routing & Map Matching APIs."""
-
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -46,7 +44,7 @@ class OsrmClient:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(url, params=params)
             if response.status_code == 200:
-                return response.json()  # type: ignore[no-any-return]
+                return cast(dict[str, Any], response.json())
             return None
         except httpx.HTTPError:
             return None
@@ -80,7 +78,7 @@ class OsrmClient:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(url, params=params)
             if response.status_code == 200:
-                return response.json()  # type: ignore[no-any-return]
+                return cast(dict[str, Any], response.json())
             return None
         except httpx.HTTPError:
             return None
