@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     threshold_config_version: str = "v1"
     gps_max_accuracy_m: float = Field(default=30.0, gt=0)
     gps_max_speed_kmh: float = Field(default=120.0, gt=0)
+    gps_worker_min_batch_size: int = Field(default=30, ge=1)
+    gps_worker_max_batch_size: int = Field(default=100, ge=1)
+    gps_worker_flush_interval_sec: float = Field(default=10.0, gt=0)
     routing_data_version: str = "not_configured"
     database_url: str = (
         "postgresql+psycopg://route_app:route_dev_only@localhost:5432/route_deviation"
