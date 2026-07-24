@@ -279,6 +279,6 @@ async def test_corridor_fallback_fails_after_all_levels_exhausted() -> None:
     result = await service.match(events)
 
     assert result.status == MapMatchStatus.NO_MATCH
-    assert "no_match_after_corridor_fallback" in str(result.reason_code)
+    assert result.reason_code == "NoMatch"
     # Total attempts: base (5.0m) + 50m + 100m + 200m = 4 attempts
     assert len(client.attempted_radiuses) == 4
