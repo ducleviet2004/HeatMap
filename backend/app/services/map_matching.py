@@ -1,3 +1,5 @@
+"""Gửi offline GPS trace tới OSRM và chuyển response thành kết quả dễ sử dụng."""
+
 from collections.abc import Sequence
 from typing import Any, Protocol
 
@@ -15,6 +17,8 @@ from app.schemas.routes import GeoJsonLineString
 
 
 class OsrmMatchClient(Protocol):
+    """Các tham số MapMatchingService cần từ OSRM client."""
+
     async def match_trace(
         self,
         coordinates: list[tuple[float, float]],
@@ -51,6 +55,8 @@ class _OsrmMatchPayload(BaseModel):
 
 
 class MapMatchingService:
+    """Match chuỗi GPS thành geometry, road-edge sequence và confidence."""
+
     def __init__(
         self,
         client: OsrmMatchClient,
@@ -64,6 +70,7 @@ class MapMatchingService:
 
     @classmethod
     def from_settings(cls, client: OsrmMatchClient, settings: Settings) -> "MapMatchingService":
+        """Lấy version từ Settings để kết quả có thể kiểm tra lại sau này."""
         return cls(
             client,
             routing_data_version=settings.routing_data_version,
@@ -71,12 +78,14 @@ class MapMatchingService:
         )
 
     async def match(self, events: Sequence[GpsEventCreate]) -> MapMatchResult:
+        """Map-match các GPS event theo đúng thứ tự đầu vào."""
         if len(events) < 2:
             return self._empty_result(
                 MapMatchStatus.NO_MATCH,
                 reason_code="insufficient_trace_points",
             )
 
+        # Không sort lại vì có thể làm sai tuyến đường thực tế.
         coordinates = [
             (event.raw_geometry.coordinates[0], event.raw_geometry.coordinates[1])
             for event in events
@@ -98,6 +107,7 @@ class MapMatchingService:
             )
 
         try:
+            # Kiểm tra cấu trúc response trước khi đọc dữ liệu bên trong.
             payload = _OsrmMatchPayload.model_validate(response)
         except ValidationError:
             return self._empty_result(
@@ -111,6 +121,7 @@ class MapMatchingService:
                 reason_code=payload.code,
             )
 
+        # OSRM có thể tách trace khi gặp GPS gap; không nối các segment này lại với nhau.
         segments = [
             MatchedTraceSegment(
                 segment_no=index,
@@ -129,6 +140,7 @@ class MapMatchingService:
 
         return MapMatchResult(
             status=MapMatchStatus.MATCHED,
+            # Dùng confidence thấp nhất để không bỏ qua một segment có kết quả match yếu.
             match_confidence=min(segment.match_confidence for segment in segments),
             segments=segments,
             unmatched_point_indices=unmatched_indices,
@@ -137,6 +149,7 @@ class MapMatchingService:
         )
 
     def _empty_result(self, status: MapMatchStatus, *, reason_code: str) -> MapMatchResult:
+        """Tạo kết quả không thành công mà không sinh geometry hoặc edge giả."""
         return MapMatchResult(
             status=status,
             routing_data_version=self.routing_data_version,
@@ -146,6 +159,7 @@ class MapMatchingService:
 
     @staticmethod
     def _strict_timestamps(events: Sequence[GpsEventCreate]) -> list[int] | None:
+        """Chỉ gửi timestamp khi tất cả giá trị tăng dần đúng yêu cầu của OSRM."""
         timestamps = [int(event.recorded_at.timestamp()) for event in events]
         if all(
             previous < current
@@ -156,12 +170,14 @@ class MapMatchingService:
 
     @staticmethod
     def _complete_radiuses(events: Sequence[GpsEventCreate]) -> list[float] | None:
+        """Chỉ gửi radius khi mọi GPS point đều có accuracy."""
         if any(event.accuracy_m is None for event in events):
             return None
         return [event.accuracy_m for event in events if event.accuracy_m is not None]
 
     @classmethod
     def _ordered_edges(cls, legs: Sequence[_OsrmLeg]) -> list[MatchedRoadEdge]:
+        """Tạo edge có hướng từ từng cặp OSRM node liên tiếp: ``A->B``."""
         ordered_edges: list[MatchedRoadEdge] = []
         for leg in legs:
             leg_edges = [
@@ -185,6 +201,7 @@ class MapMatchingService:
         existing: list[MatchedRoadEdge],
         incoming: list[MatchedRoadEdge],
     ) -> None:
+        """Nối edge của leg mới và bỏ phần bị OSRM lặp lại ở ranh giới hai leg."""
         maximum_overlap = min(len(existing), len(incoming))
         overlap = next(
             (size for size in range(maximum_overlap, 0, -1) if existing[-size:] == incoming[:size]),
