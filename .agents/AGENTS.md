@@ -21,7 +21,7 @@ Dự án **Route Deviation Heatmap Analytics** tuân thủ nghiêm ngặt các q
    - Mỗi thành viên trong nhóm **chỉ được phép push code lên nhánh cá nhân của mình** trên GitHub remote (`origin <nhánh_cá_nhân>`):
      - **Nguyễn Văn Đoan** -> Push duy nhất lên nhánh `Doan` (`git push origin Doan`)
      - **Nguyễn Văn Sáng** -> Push duy nhất lên nhánh `Sang` (`git push origin Sang`)
-     - **Lê Việt** -> Push duy nhất lên nhánh `Viet` (`git push origin Viet`)
+     - **Lê Việt** -> Push duy nhất lên nhánh `VietLe` (`git push origin VietLe`)
    - **TUYỆT ĐỐI KHÔNG** push trực tiếp lên `main`, `develop` hoặc nhánh của thành viên khác.
 
 3. **Commit & Push Code Ngay Sau Khi Hoàn Thành Mỗi Task**:
@@ -44,6 +44,7 @@ Dự án **Route Deviation Heatmap Analytics** tuân thủ nghiêm ngặt các q
 ## 2. Quy Chuẩn Codebase & Quality Gates (Bắt Buộc Pass 100%)
 
 ### Backend (Python 3.12 / FastAPI / SQLAlchemy 2.0 / PostGIS)
+
 - **Formatting**: Bắt buộc chạy `ruff format backend/` (Không thừa thiếu khoảng trắng, tuân thủ PEP8).
 - **Linting**: Bắt buộc chạy `ruff check backend/` (Sắp xếp imports, loại bỏ import thừa, không dùng datetime thiếu timezone).
 - **Static Type Check**: Tuân thủ `mypy app` không có lỗi type annotations.
@@ -51,6 +52,7 @@ Dự án **Route Deviation Heatmap Analytics** tuân thủ nghiêm ngặt các q
 - **Unit & Integration Tests**: Đảm bảo tất cả các test cases trong `pytest` chạy **PASS 100%** trước khi commit.
 
 ### Frontend (React 19 / TypeScript / Vite / MapLibre / Deck.gl)
+
 - **Formatting**: Bắt buộc chạy `npx prettier --write frontend/`.
 - **Linting**: Bắt buộc chạy `npm --prefix frontend run lint` (ESLint 9+ flat config).
 - **Type Checking**: Bắt buộc chạy `npm --prefix frontend run typecheck` (`tsc -b`).
