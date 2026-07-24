@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     )
     redis_url: str = "redis://localhost:6379/0"
     redis_stream_name: str = "route-deviation:events"
+    redis_dead_letter_stream_name: str = "route-deviation:dead-letter"
     osrm_url: str | None = None
     cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: ["http://localhost:5173"]
