@@ -28,3 +28,14 @@ async def get_trip(
     if trip is None:
         raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail="Trip not found")
     return trip
+
+
+@router.post("/{trip_id}/complete", response_model=TripResponse)
+async def complete_trip(
+    trip_id: UUID,
+    service: Annotated[TripService, Depends(get_trip_service)],
+) -> TripResponse:
+    trip = await service.finalize_trip(trip_id)
+    if trip is None:
+        raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail="Trip not found")
+    return trip

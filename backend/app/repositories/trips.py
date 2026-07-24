@@ -24,3 +24,8 @@ class TripRepository:
         stmt = select(Trip).where(Trip.driver_id == driver_id).order_by(Trip.started_at.desc())
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
+
+    async def finalize(self, trip: Trip) -> Trip:
+        trip.status = "final"
+        await self.session.flush()
+        return trip
