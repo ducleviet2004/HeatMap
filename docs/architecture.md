@@ -45,6 +45,14 @@ length, GPS-gap, and corridor-distance gates pass. A missing edge run that remai
 configured corridor is labeled `same_corridor` instead of bypass to reduce GPS-drift false
 positives. Missing corridor evidence never produces a confirmed bypass.
 
+## Bypass to H3 grid
+
+Only confirmed bypass LineStrings are converted to H3 cells at resolutions 9–12. The
+converter samples each line using at most half an H3 edge length and connects adjacent
+sample cells, avoiding gaps along the route. Records are deduplicated by H3 resolution and
+cell before persistence. Database inserts use `ON CONFLICT DO NOTHING`, so overlapping
+segments and worker retries contribute at most once per trip/route/hex/algorithm version.
+
 ## Data model
 
 `drivers` own `trips`; each trip has versioned `planned_routes` and immutable `gps_events`.
