@@ -10,7 +10,7 @@ from app.services.trips import TripService
 
 
 def get_readiness_service(request: Request) -> ReadinessService:
-    return request.app.state.readiness_service
+    return request.app.state.readiness_service  # type: ignore[no-any-return]
 
 
 async def get_session(request: Request) -> AsyncIterator[AsyncSession]:
