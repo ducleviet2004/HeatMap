@@ -1,0 +1,8 @@
+# Route Deviation Heatmap Analytics System (PRD V4) — Cursor Rules
+
+- MUST run `ruff format backend/` and `ruff check backend/` before committing python code.
+- MUST run `npx prettier --write frontend/` and `npm run lint` before committing frontend code.
+- MUST run unit tests (`pytest` and `vitest`) to verify 100% pass rate before completing a task.
+- ALWAYS use WGS84 EPSG:4326 for spatial geometries (Point, LineString) in PostGIS.
+- ALWAYS commit and push code to git remote (`git push origin <branch>`) after each completed task.
+- Update Google Sheet task status to 'Hoàn thành' (100%) upon task completion.
