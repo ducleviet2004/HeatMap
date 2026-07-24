@@ -39,8 +39,34 @@ async function get<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
+export interface HeatmapProperties {
+  hex_id?: string;
+  h3_resolution?: number;
+  bypass_trip_count?: number;
+  heat_weight: number;
+  display_weight: number;
+}
+
+export interface HeatmapFeature {
+  type: "Feature";
+  properties: HeatmapProperties;
+  geometry: {
+    type: "Polygon";
+    coordinates: number[][][];
+  };
+}
+
+export interface HeatmapResponse {
+  type: "FeatureCollection";
+  features: HeatmapFeature[];
+}
+
 export const statusApi = {
   health: () => get<Health>("/api/v1/health"),
   readiness: () => get<Readiness>("/api/v1/health/ready"),
   version: () => get<Version>("/api/v1/version"),
+};
+
+export const heatmapApi = {
+  get: () => get<HeatmapResponse>("/api/v1/heatmap"),
 };
