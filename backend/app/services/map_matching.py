@@ -77,8 +77,12 @@ class MapMatchingService:
             algorithm_version=settings.algorithm_version,
         )
 
-    async def match(self, events: Sequence[GpsEventCreate]) -> MapMatchResult:
-        """Map-match các GPS event theo đúng thứ tự đầu vào."""
+    async def match(
+        self,
+        events: Sequence[GpsEventCreate],
+        fallback_levels: Sequence[float] = (50.0, 100.0, 200.0),
+    ) -> MapMatchResult:
+        """Map-match các GPS event với cơ chế Corridor Fallback Check (50m -> 100m -> 200m)."""
         if len(events) < 2:
             return self._empty_result(
                 MapMatchStatus.NO_MATCH,
@@ -91,61 +95,75 @@ class MapMatchingService:
             for event in events
         ]
         timestamps = self._strict_timestamps(events)
-        radiuses = self._complete_radiuses(events)
-        response = await self.client.match_trace(
-            coordinates,
-            timestamps=timestamps,
-            radiuses=radiuses,
-            overview="full",
-            geometries="geojson",
-        )
+        base_radiuses = self._complete_radiuses(events)
 
-        if response is None:
-            return self._empty_result(
-                MapMatchStatus.UNAVAILABLE,
-                reason_code="osrm_unavailable",
+        # Danh sách các nấc radiuses thử nghiệm: Dữ liệu thực tế trước, sau đó là 50m, 100m, 200m
+        radius_attempts: list[tuple[float | None, list[float] | None]] = [(None, base_radiuses)]
+
+        for level in fallback_levels:
+            radius_attempts.append((level, [level] * len(events)))
+
+        last_reason = "NoMatch"
+
+        for fallback_radius, candidate_radiuses in radius_attempts:
+            response = await self.client.match_trace(
+                coordinates,
+                timestamps=timestamps,
+                radiuses=candidate_radiuses,
+                overview="full",
+                geometries="geojson",
             )
 
-        try:
-            # Kiểm tra cấu trúc response trước khi đọc dữ liệu bên trong.
-            payload = _OsrmMatchPayload.model_validate(response)
-        except ValidationError:
-            return self._empty_result(
-                MapMatchStatus.INVALID_RESPONSE,
-                reason_code="invalid_osrm_response",
+            if response is None:
+                return self._empty_result(
+                    MapMatchStatus.UNAVAILABLE,
+                    reason_code="osrm_unavailable",
+                )
+
+            try:
+                # Kiểm tra cấu trúc response trước khi đọc dữ liệu bên trong.
+                payload = _OsrmMatchPayload.model_validate(response)
+            except ValidationError:
+                return self._empty_result(
+                    MapMatchStatus.INVALID_RESPONSE,
+                    reason_code="invalid_osrm_response",
+                )
+
+            if payload.code != "Ok" or not payload.matchings:
+                last_reason = payload.code or "NoMatch"
+                continue
+
+            # OSRM có thể tách trace khi gặp GPS gap; không nối các segment này lại với nhau.
+            segments = [
+                MatchedTraceSegment(
+                    segment_no=index,
+                    match_confidence=matching.confidence,
+                    geometry=GeoJsonLineString(
+                        type=matching.geometry.type,
+                        coordinates=matching.geometry.coordinates,
+                    ),
+                    ordered_road_edges=self._ordered_edges(matching.legs),
+                )
+                for index, matching in enumerate(payload.matchings)
+            ]
+            unmatched_indices = [
+                index for index, tracepoint in enumerate(payload.tracepoints) if tracepoint is None
+            ]
+
+            return MapMatchResult(
+                status=MapMatchStatus.MATCHED,
+                # Dùng confidence thấp nhất để không bỏ qua một segment có kết quả match yếu.
+                match_confidence=min(segment.match_confidence for segment in segments),
+                segments=segments,
+                unmatched_point_indices=unmatched_indices,
+                routing_data_version=self.routing_data_version,
+                algorithm_version=self.algorithm_version,
+                fallback_radius_m=fallback_radius,
             )
 
-        if payload.code != "Ok" or not payload.matchings:
-            return self._empty_result(
-                MapMatchStatus.NO_MATCH,
-                reason_code=payload.code,
-            )
-
-        # OSRM có thể tách trace khi gặp GPS gap; không nối các segment này lại với nhau.
-        segments = [
-            MatchedTraceSegment(
-                segment_no=index,
-                match_confidence=matching.confidence,
-                geometry=GeoJsonLineString(
-                    type=matching.geometry.type,
-                    coordinates=matching.geometry.coordinates,
-                ),
-                ordered_road_edges=self._ordered_edges(matching.legs),
-            )
-            for index, matching in enumerate(payload.matchings)
-        ]
-        unmatched_indices = [
-            index for index, tracepoint in enumerate(payload.tracepoints) if tracepoint is None
-        ]
-
-        return MapMatchResult(
-            status=MapMatchStatus.MATCHED,
-            # Dùng confidence thấp nhất để không bỏ qua một segment có kết quả match yếu.
-            match_confidence=min(segment.match_confidence for segment in segments),
-            segments=segments,
-            unmatched_point_indices=unmatched_indices,
-            routing_data_version=self.routing_data_version,
-            algorithm_version=self.algorithm_version,
+        return self._empty_result(
+            MapMatchStatus.NO_MATCH,
+            reason_code=last_reason,
         )
 
     def _empty_result(self, status: MapMatchStatus, *, reason_code: str) -> MapMatchResult:

@@ -43,3 +43,4 @@ class MapMatchResult(BaseModel):
     routing_data_version: str
     algorithm_version: str
     reason_code: str | None = None
+    fallback_radius_m: float | None = None
