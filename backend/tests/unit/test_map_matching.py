@@ -216,3 +216,69 @@ async def test_requires_at_least_two_trace_points() -> None:
     assert result.status == MapMatchStatus.NO_MATCH
     assert result.reason_code == "insufficient_trace_points"
     assert client.coordinates is None
+
+
+class FallbackMockOsrmClient:
+    def __init__(self, succeed_at_radius: float) -> None:
+        self.succeed_at_radius = succeed_at_radius
+        self.attempted_radiuses: list[list[float] | None] = []
+
+    async def match_trace(
+        self,
+        coordinates: list[tuple[float, float]],
+        timestamps: list[int] | None = None,
+        radiuses: list[float] | None = None,
+        overview: str = "full",
+        geometries: str = "geojson",
+    ) -> dict[str, Any] | None:
+        self.attempted_radiuses.append(radiuses)
+        if radiuses and radiuses[0] == self.succeed_at_radius:
+            return successful_response()
+        return {"code": "NoMatch", "message": "Could not match trace at this radius."}
+
+
+@pytest.mark.asyncio
+async def test_corridor_fallback_check_recovers_on_100m_radius() -> None:
+    # Fails on 5.0m (accuracy) and 50.0m, succeeds on 100.0m
+    client = FallbackMockOsrmClient(succeed_at_radius=100.0)
+    service = MapMatchingService(
+        client,
+        routing_data_version="routing-v1",
+        algorithm_version="algorithm-v1",
+    )
+
+    events = [
+        make_event(0, recorded_at=STARTED_AT, accuracy_m=5.0),
+        make_event(1, recorded_at=STARTED_AT + timedelta(seconds=10), accuracy_m=5.0),
+    ]
+
+    result = await service.match(events)
+
+    assert result.status == MapMatchStatus.MATCHED
+    assert result.fallback_radius_m == 100.0
+    # Attempted radiuses: [5.0, 5.0] -> [50.0, 50.0] -> [100.0, 100.0]
+    assert len(client.attempted_radiuses) == 3
+    assert client.attempted_radiuses[2] == [100.0, 100.0]
+
+
+@pytest.mark.asyncio
+async def test_corridor_fallback_fails_after_all_levels_exhausted() -> None:
+    # Fails on all radiuses (succeed_at_radius impossible 999.0m)
+    client = FallbackMockOsrmClient(succeed_at_radius=999.0)
+    service = MapMatchingService(
+        client,
+        routing_data_version="routing-v1",
+        algorithm_version="algorithm-v1",
+    )
+
+    events = [
+        make_event(0, recorded_at=STARTED_AT, accuracy_m=5.0),
+        make_event(1, recorded_at=STARTED_AT + timedelta(seconds=10), accuracy_m=5.0),
+    ]
+
+    result = await service.match(events)
+
+    assert result.status == MapMatchStatus.NO_MATCH
+    assert "no_match_after_corridor_fallback" in str(result.reason_code)
+    # Total attempts: base (5.0m) + 50m + 100m + 200m = 4 attempts
+    assert len(client.attempted_radiuses) == 4
