@@ -10,7 +10,7 @@ interface HeatmapMapProps {
   onHover: (cell: H3Cell | null) => void;
 }
 
-const VIETNAM_CENTER: [number, number] = [106.5, 16.2];
+const HANOI_CENTER: [number, number] = [105.8542, 21.0285];
 
 export function HeatmapMap({ cells, onHover }: HeatmapMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -22,8 +22,8 @@ export function HeatmapMap({ cells, onHover }: HeatmapMapProps) {
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      center: VIETNAM_CENTER,
-      zoom: 4.7,
+      center: HANOI_CENTER,
+      zoom: 11,
       minZoom: 4,
       maxZoom: 18,
       style: {
