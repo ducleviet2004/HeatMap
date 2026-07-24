@@ -98,14 +98,12 @@ class MapMatchingService:
         base_radiuses = self._complete_radiuses(events)
 
         # Danh sách các nấc radiuses thử nghiệm: Dữ liệu thực tế trước, sau đó là 50m, 100m, 200m
-        radius_attempts: list[tuple[float | None, list[float] | None]] = []
-        if base_radiuses is not None:
-            radius_attempts.append((None, base_radiuses))
+        radius_attempts: list[tuple[float | None, list[float] | None]] = [(None, base_radiuses)]
 
         for level in fallback_levels:
             radius_attempts.append((level, [level] * len(events)))
 
-        last_reason = "no_match"
+        last_reason = "NoMatch"
 
         for fallback_radius, candidate_radiuses in radius_attempts:
             response = await self.client.match_trace(
@@ -132,7 +130,7 @@ class MapMatchingService:
                 )
 
             if payload.code != "Ok" or not payload.matchings:
-                last_reason = payload.code or "no_match"
+                last_reason = payload.code or "NoMatch"
                 continue
 
             # OSRM có thể tách trace khi gặp GPS gap; không nối các segment này lại với nhau.
@@ -165,7 +163,7 @@ class MapMatchingService:
 
         return self._empty_result(
             MapMatchStatus.NO_MATCH,
-            reason_code=f"no_match_after_corridor_fallback:{last_reason}",
+            reason_code=last_reason,
         )
 
     def _empty_result(self, status: MapMatchStatus, *, reason_code: str) -> MapMatchResult:
