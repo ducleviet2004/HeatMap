@@ -1,4 +1,7 @@
+import asyncio
 import os
+import sys
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -6,6 +9,9 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.adapters.redis_streams import RedisStreams
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 pytestmark = pytest.mark.skipif(
     os.getenv("RUN_INTEGRATION") != "1",
@@ -56,6 +62,27 @@ async def test_real_redis_stream_publish() -> None:
         assert message_id
         assert await streams.ping()
         assert await streams.stream_accessible()
+
+        # Test GPS event publishing
+        gps_message_id = await streams.publish_gps_event(
+            event_id=uuid4(),
+            trip_id=uuid4(),
+            driver_id=uuid4(),
+            sequence_no=1,
+            recorded_at=datetime.now(UTC),
+            longitude=105.85,
+            latitude=21.02,
+        )
+        assert gps_message_id
+
+        # Test consumer group creation
+        created = await streams.create_consumer_group("integration-workers")
+        assert created is True
+
+        # Test stream info telemetry
+        info = await streams.get_stream_info()
+        assert info["accessible"] is True
+        assert info["length"] >= 2
     finally:
         await streams.client.delete(stream_name)  # type: ignore[attr-defined]
         await streams.close()
