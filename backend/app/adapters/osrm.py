@@ -69,6 +69,7 @@ class OsrmClient:
             "overview": overview,
             "geometries": geometries,
             "annotations": "nodes,distance,duration",
+            "gaps": "split",
         }
 
         if timestamps and len(timestamps) == len(coordinates):
@@ -79,7 +80,7 @@ class OsrmClient:
         try:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(url, params=params)
-            if response.status_code == 200:
+            if response.status_code in {200, 400}:
                 return response.json()  # type: ignore[no-any-return]
             return None
         except httpx.HTTPError:
