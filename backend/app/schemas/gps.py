@@ -1,7 +1,19 @@
 from datetime import datetime
+from enum import StrEnum
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
+
+
+class GpsRejectionReason(StrEnum):
+    POOR_ACCURACY = "poor_accuracy"
+    EXCESSIVE_SPEED = "excessive_speed"
+
+
+class GpsCleaningResult(BaseModel):
+    accepted: bool
+    reasons: tuple[GpsRejectionReason, ...] = ()
+    threshold_config_version: str
 
 
 class GeoJsonPoint(BaseModel):
