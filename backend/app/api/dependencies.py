@@ -4,6 +4,8 @@ from typing import Annotated, cast
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.adapters.redis_streams import RedisStreams
+from app.services.gps_ingestion import GpsIngestionService
 from app.services.planned_routes import PlannedRouteService
 from app.services.readiness import ReadinessService
 from app.services.trips import TripService
@@ -11,6 +13,10 @@ from app.services.trips import TripService
 
 def get_readiness_service(request: Request) -> ReadinessService:
     return cast(ReadinessService, request.app.state.readiness_service)
+
+
+def get_redis_streams(request: Request) -> RedisStreams:
+    return cast(RedisStreams, request.app.state.redis)
 
 
 async def get_session(request: Request) -> AsyncIterator[AsyncSession]:
@@ -27,3 +33,10 @@ async def get_trip_service(session: SessionDep) -> TripService:
 
 async def get_planned_route_service(session: SessionDep) -> PlannedRouteService:
     return PlannedRouteService(session)
+
+
+async def get_gps_ingestion_service(
+    session: SessionDep,
+    redis: Annotated[RedisStreams, Depends(get_redis_streams)],
+) -> GpsIngestionService:
+    return GpsIngestionService(session, redis)
