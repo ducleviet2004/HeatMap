@@ -79,10 +79,21 @@ async def test_real_redis_stream_publish() -> None:
         created = await streams.create_consumer_group("integration-workers")
         assert created is True
 
+        # Test dead-letter stream publishing
+        dlq_id = await streams.publish_dead_letter(
+            original_message_id=message_id,
+            original_stream=stream_name,
+            error_reason="Integration test simulated failure",
+            attempts=3,
+            payload={"corrupted": False},
+        )
+        assert dlq_id
+
         # Test stream info telemetry
         info = await streams.get_stream_info()
         assert info["accessible"] is True
         assert info["length"] >= 2
     finally:
         await streams.client.delete(stream_name)  # type: ignore[attr-defined]
+        await streams.client.delete(streams.dead_letter_stream_name)  # type: ignore[attr-defined]
         await streams.close()
