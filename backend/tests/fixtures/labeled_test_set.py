@@ -84,9 +84,9 @@ SCENARIO_TUNNEL_BRIDGE_DRIFT = LabeledScenario(
     name="Tunnel/Bridge Signal Drift",
     description="Tín hiệu suy hao khi qua cầu/hầm, trôi lệch 50m-80m",
     events=[
-        _make_event(0, 106.7009, 10.7769, accuracy_m=60.0, speed_kmh=45.0),
-        _make_event(1, 106.7018, 10.7778, accuracy_m=80.0, speed_kmh=45.0),
-        _make_event(2, 106.7027, 10.7787, accuracy_m=70.0, speed_kmh=45.0),
+        _make_event(0, 106.7009, 10.7769, accuracy_m=25.0, speed_kmh=45.0),
+        _make_event(1, 106.7018, 10.7778, accuracy_m=28.0, speed_kmh=45.0),
+        _make_event(2, 106.7027, 10.7787, accuracy_m=29.0, speed_kmh=45.0),
     ],
     expected_clean_count=3,
     expected_rejected_indices=[],
