@@ -4,10 +4,28 @@ Dự án **Route Deviation Heatmap Analytics** tuân thủ nghiêm ngặt các q
 
 ---
 
-## 1. Quy Trình Làm Việc & Push Code Bắt Buộc (Mandatory Workflow)
+## 1. Quy Trình Làm Việc & Quản Lý Nhánh Git (Mandatory Git Workflow)
 
-1. **Commit & Push Code sau MỖI Task**:
-   - Ngay sau khi hoàn thành và kiểm thử 1 task, **BẮT BUỘC** phải `git add`, `git commit` và `git push` code lên GitHub remote (`origin <branch>`).
+### 🔴 QUY TẮC NHÁNH CÁ NHÂN & ĐỒNG BỘ CODE BẮT BUỘC:
+
+1. **Pull & Merge Code từ `develop` BẮT BUỘC Trước Khi Làm Task Mới**:
+   - Trước khi bắt đầu bất kỳ Task mới nào, Agent **BẮT BUỘC** phải thực hiện các lệnh:
+     ```bash
+     git fetch origin
+     git merge origin/develop --no-edit
+     # Hoặc: git pull origin develop
+     ```
+   - Giải quyết mọi xung đột (conflict) nếu có và đảm bảo tất cả test cases vẫn **PASS 100%** trước khi triển khai code cho task mới.
+
+2. **Chỉ Push Code Lên Nhánh Cá Nhân Riêng Biệt**:
+   - Mỗi thành viên trong nhóm **chỉ được phép push code lên nhánh cá nhân của mình** trên GitHub remote (`origin <nhánh_cá_nhân>`):
+     - **Nguyễn Văn Đoan** -> Push duy nhất lên nhánh `Doan` (`git push origin Doan`)
+     - **Nguyễn Văn Sáng** -> Push duy nhất lên nhánh `Sang` (`git push origin Sang`)
+     - **Lê Việt** -> Push duy nhất lên nhánh `Viet` (`git push origin Viet`)
+   - **TUYỆT ĐỐI KHÔNG** push trực tiếp lên `main`, `develop` hoặc nhánh của thành viên khác.
+
+3. **Commit & Push Code Ngay Sau Khi Hoàn Thành Mỗi Task**:
+   - Ngay sau khi hoàn thành và kiểm thử 1 task, **BẮT BUỘC** phải `git add`, `git commit` và `git push origin <nhánh_cá_nhân>`.
    - Đặt commit message theo chuẩn **Conventional Commits**:
      - `feat(component): ...` (Tính năng mới)
      - `fix(component): ...` (Sửa lỗi)
@@ -15,10 +33,10 @@ Dự án **Route Deviation Heatmap Analytics** tuân thủ nghiêm ngặt các q
      - `docs(component): ...` (Cập nhật tài liệu/walkthrough)
      - `ci(component): ...` (Cấu hình CI/CD)
 
-2. **Cập Nhật Tiến Độ trên Google Sheet**:
+4. **Cập Nhật Tiến Độ trên Google Sheet**:
    - Ngay sau khi push code, tự động cập nhật trạng thái Task tương ứng trên Google Sheet `WBS_Tasks_Roadmap` sang **`Hoàn thành`** (Progress tự động thành **`100%`**).
 
-3. **Tạo Walkthrough Báo Cáo**:
+5. **Tạo Walkthrough Báo Cáo**:
    - Tạo hoặc cập nhật file `walkthrough.md` tổng kết các file thay đổi, lệnh đã test và kết quả kiểm thử.
 
 ---
