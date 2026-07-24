@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class GeoJsonLineString(BaseModel):
@@ -22,6 +22,7 @@ class PlannedRouteCreate(BaseModel):
     routing_data_version: str = "v1"
     route_source: str = "manual"
     geometry: GeoJsonLineString
+    ordered_edge_ids: list[str] = Field(default_factory=list)
     valid_from: datetime
 
 
@@ -32,6 +33,7 @@ class PlannedRouteResponse(BaseModel):
     routing_data_version: str
     route_source: str
     geometry: GeoJsonLineString
+    ordered_edge_ids: list[str] = Field(default_factory=list)
     valid_from: datetime
     valid_to: datetime | None = None
     created_at: datetime
