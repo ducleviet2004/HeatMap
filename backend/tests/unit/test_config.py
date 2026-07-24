@@ -19,8 +19,14 @@ def test_cors_wildcard_is_rejected() -> None:
 
 @pytest.mark.parametrize(
     ("field_name", "value"),
-    [("gps_max_accuracy_m", 0), ("gps_max_speed_kmh", -1)],
+    [
+        ("gps_max_accuracy_m", 0),
+        ("gps_max_speed_kmh", -1),
+        ("bypass_min_match_confidence", 1.1),
+        ("bypass_min_missing_run_m", 0),
+        ("bypass_corridor_tolerance_m", -1),
+    ],
 )
-def test_gps_cleaning_thresholds_must_be_positive(field_name: str, value: float) -> None:
+def test_algorithm_thresholds_are_valid(field_name: str, value: float) -> None:
     with pytest.raises(ValidationError):
         Settings(**{field_name: value})

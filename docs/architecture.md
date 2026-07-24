@@ -36,6 +36,15 @@ annotation overlap at leg boundaries is removed. Each segment retains OSRM's con
 trace-level `match_confidence` is the minimum segment confidence. Results always carry routing-data
 and algorithm versions because edge identity is snapshot-dependent.
 
+## Ordered-edge bypass detection
+
+Planned and actual edge sequences are aligned with longest common subsequence rather than set
+subtraction, preserving order and repeated edge occurrences. Contiguous missing planned-edge runs
+are candidates only. A candidate is confirmed after routing-version, map-match confidence, minimum
+length, GPS-gap, and corridor-distance gates pass. A missing edge run that remains within the
+configured corridor is labeled `same_corridor` instead of bypass to reduce GPS-drift false
+positives. Missing corridor evidence never produces a confirmed bypass.
+
 ## Data model
 
 `drivers` own `trips`; each trip has versioned `planned_routes` and immutable `gps_events`.

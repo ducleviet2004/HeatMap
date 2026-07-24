@@ -19,6 +19,7 @@ class PlannedRouteService:
             routing_data_version=data.routing_data_version,
             route_source=data.route_source,
             geometry=geometry_wkb,
+            ordered_edge_ids=data.ordered_edge_ids,
             valid_from=data.valid_from,
         )
         route = await self.repository.create(route)
@@ -30,6 +31,7 @@ class PlannedRouteService:
             routing_data_version=route.routing_data_version,
             route_source=route.route_source,
             geometry=geometry_geojson,
+            ordered_edge_ids=self._ordered_edge_ids(route),
             valid_from=route.valid_from,
             valid_to=route.valid_to,
             created_at=route.created_at,
@@ -45,9 +47,17 @@ class PlannedRouteService:
                 routing_data_version=r.routing_data_version,
                 route_source=r.route_source,
                 geometry=self.repository.wkb_to_geojson(r.geometry),
+                ordered_edge_ids=self._ordered_edge_ids(r),
                 valid_from=r.valid_from,
                 valid_to=r.valid_to,
                 created_at=r.created_at,
             )
             for r in routes
         ]
+
+    @staticmethod
+    def _ordered_edge_ids(route: PlannedRoute) -> list[str]:
+        """Chuẩn hóa JSONB thành danh sách string cho API và thuật toán so sánh."""
+        if not isinstance(route.ordered_edge_ids, list):
+            return []
+        return [str(edge_id) for edge_id in route.ordered_edge_ids]

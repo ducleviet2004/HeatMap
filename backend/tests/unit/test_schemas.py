@@ -104,10 +104,12 @@ class TestRouteSchemas:
             geometry=GeoJsonLineString(
                 coordinates=[[105.85, 21.03], [105.86, 21.04], [105.87, 21.05]]
             ),
+            ordered_edge_ids=["10->20", "20->30"],
             valid_from=NOW,
         )
         assert route.route_version == 1
         assert len(route.geometry.coordinates) == 3
+        assert route.ordered_edge_ids == ["10->20", "20->30"]
 
     def test_planned_route_response_valid(self) -> None:
         route = PlannedRouteResponse(
@@ -117,10 +119,12 @@ class TestRouteSchemas:
             routing_data_version="v2",
             route_source="osrm",
             geometry=GeoJsonLineString(coordinates=[[105.85, 21.03], [105.86, 21.04]]),
+            ordered_edge_ids=["10->20"],
             valid_from=NOW,
             created_at=NOW,
         )
         assert route.route_version == 2
+        assert route.ordered_edge_ids == ["10->20"]
 
     def test_planned_route_invalid_geometry(self) -> None:
         with pytest.raises(ValidationError):
