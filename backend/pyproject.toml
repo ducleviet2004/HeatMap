@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "route-deviation-api"
 version = "0.1.0"
 description = "Foundation API for Route Deviation Heatmap Analytics"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
   "alembic==1.14.1",
   "fastapi==0.115.8",
