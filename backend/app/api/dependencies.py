@@ -8,6 +8,7 @@ from app.adapters.redis_streams import RedisStreams
 from app.services.gps_ingestion import GpsIngestionService
 from app.services.planned_routes import PlannedRouteService
 from app.services.readiness import ReadinessService
+from app.services.trip_comparison import TripComparisonService
 from app.services.trips import TripService
 
 
@@ -40,3 +41,7 @@ async def get_gps_ingestion_service(
     redis: Annotated[RedisStreams, Depends(get_redis_streams)],
 ) -> GpsIngestionService:
     return GpsIngestionService(session, redis)
+
+
+async def get_trip_comparison_service(session: SessionDep) -> TripComparisonService:
+    return TripComparisonService(session)

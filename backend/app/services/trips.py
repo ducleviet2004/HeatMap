@@ -44,3 +44,19 @@ class TripService:
             created_at=trip.created_at,
             updated_at=trip.updated_at,
         )
+
+    async def finalize_trip(self, trip_id: UUID) -> TripResponse | None:
+        trip = await self.repository.get_by_id(trip_id)
+        if trip is None:
+            return None
+        trip = await self.repository.finalize(trip)
+        return TripResponse(
+            id=trip.id,
+            external_id=trip.external_id,
+            driver_id=trip.driver_id,
+            status=trip.status,
+            started_at=trip.started_at,
+            ended_at=trip.ended_at,
+            created_at=trip.created_at,
+            updated_at=trip.updated_at,
+        )
