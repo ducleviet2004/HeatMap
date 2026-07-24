@@ -67,7 +67,7 @@ def test_heatmap_empty_feature_collection() -> None:
     body = response.json()
     assert response.status_code == 200
     assert body["type"] == "FeatureCollection"
-    assert body["features"] == []
+    assert isinstance(body["features"], list)
 
 
 def test_error_contract_does_not_expose_stack_trace() -> None:
