@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     gps_worker_min_batch_size: int = Field(default=30, ge=1)
     gps_worker_max_batch_size: int = Field(default=100, ge=1)
     gps_worker_flush_interval_sec: float = Field(default=10.0, gt=0)
+    bypass_min_match_confidence: float = Field(default=0.7, ge=0, le=1)
+    bypass_min_missing_run_m: float = Field(default=50.0, gt=0)
+    bypass_corridor_tolerance_m: float = Field(default=30.0, gt=0)
     routing_data_version: str = "not_configured"
     database_url: str = (
         "postgresql+psycopg://route_app:route_dev_only@localhost:5432/route_deviation"
