@@ -61,6 +61,15 @@ def test_version_contract() -> None:
     assert body["routing_data"] == "not_configured"
 
 
+def test_heatmap_empty_feature_collection() -> None:
+    with TestClient(app) as client:
+        response = client.get("/api/v1/heatmap")
+    body = response.json()
+    assert response.status_code == 200
+    assert body["type"] == "FeatureCollection"
+    assert body["features"] == []
+
+
 def test_error_contract_does_not_expose_stack_trace() -> None:
     with TestClient(app) as client:
         response = client.get("/api/v1/not-a-real-endpoint")

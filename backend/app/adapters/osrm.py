@@ -1,16 +1,18 @@
+"""OSRM Async Client Adapter for Routing & Map Matching APIs."""
+
 from typing import Any, cast
 
 import httpx
 
 
 class OsrmClient:
-    """HTTP Client adapter for communicating with self-hosted OSRM service."""
+    """Giao tiếp với OSRM self-hosted qua HTTP."""
 
     def __init__(self, base_url: str | None) -> None:
         self.base_url = base_url.rstrip("/") if base_url else None
 
     async def status(self) -> tuple[str, str | None]:
-        """Check status of OSRM routing service."""
+        """Kiểm tra OSRM có sẵn sàng hay không."""
         if not self.base_url:
             return "not_configured", "No local routing graph configured"
         try:
@@ -28,7 +30,7 @@ class OsrmClient:
         overview: str = "full",
         geometries: str = "geojson",
     ) -> dict[str, Any] | None:
-        """Call OSRM /route/v1/driving endpoint to get route geometries & distance."""
+        """Lấy tuyến đường giữa các tọa độ."""
         if not self.base_url or len(coordinates) < 2:
             return None
 
@@ -57,7 +59,7 @@ class OsrmClient:
         overview: str = "full",
         geometries: str = "geojson",
     ) -> dict[str, Any] | None:
-        """Call OSRM /match/v1/driving endpoint to map-match raw GPS trace."""
+        """Gửi offline GPS trace tới OSRM Match API."""
         if not self.base_url or len(coordinates) < 2:
             return None
 
@@ -67,8 +69,10 @@ class OsrmClient:
             "overview": overview,
             "geometries": geometries,
             "annotations": "nodes,distance,duration",
+            "gaps": "split",
         }
 
+        # Mỗi timestamp và radius phải ứng với đúng một coordinate.
         if timestamps and len(timestamps) == len(coordinates):
             params["timestamps"] = ";".join(str(t) for t in timestamps)
         if radiuses and len(radiuses) == len(coordinates):
@@ -77,7 +81,8 @@ class OsrmClient:
         try:
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(url, params=params)
-            if response.status_code == 200:
+            # NoMatch cũng trả HTTP 400; giữ JSON để service đọc được lý do cụ thể.
+            if response.status_code in {200, 400}:
                 return cast(dict[str, Any], response.json())
             return None
         except httpx.HTTPError:
