@@ -1,0 +1,13 @@
+{
+  "region": "Vietnam",
+  "provider": "Geofabrik",
+  "source_url": "https://download.geofabrik.de/asia/vietnam-260723.osm.pbf",
+  "source_timestamp_utc": "2026-07-23T20:22:05Z",
+  "downloaded_date": "2026-07-24",
+  "md5": "d1f01d6b9840635ff3b3b5be13dfc516",
+  "osrm_image": "ghcr.io/project-osrm/osrm-backend:v5.27.1",
+  "osrm_image_digest": "sha256:855614a38f464b0558a2ad6eaa7cb8c139f39887da9b38b485ce453c6e6e6124",
+  "profile": "car.lua",
+  "algorithm": "mld",
+  "graph_basename": "region.osrm"
+}
