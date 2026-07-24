@@ -4,8 +4,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi import status as http_status
 
-from app.api.dependencies import get_trip_service
+from app.api.dependencies import get_trip_comparison_service, get_trip_service
+from app.schemas.comparison import RouteComparisonResponse
 from app.schemas.trips import TripCreate, TripResponse
+from app.services.trip_comparison import TripComparisonService
 from app.services.trips import TripService
 
 router = APIRouter(prefix="/trips", tags=["trips"])
@@ -39,3 +41,14 @@ async def complete_trip(
     if trip is None:
         raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail="Trip not found")
     return trip
+
+
+@router.get("/{trip_id}/route-comparison", response_model=RouteComparisonResponse)
+async def get_route_comparison(
+    trip_id: UUID,
+    service: Annotated[TripComparisonService, Depends(get_trip_comparison_service)],
+) -> RouteComparisonResponse:
+    result = await service.get_comparison(trip_id)
+    if result is None:
+        raise HTTPException(status_code=http_status.HTTP_404_NOT_FOUND, detail="Trip not found")
+    return result
