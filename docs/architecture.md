@@ -27,6 +27,15 @@ configuration version in every decision. Filtering returns references to accepte
 updating raw geometry or measurements. Persisting cleaning decisions is outside this slice and
 would require a new Alembic migration.
 
+## GPS gap handling
+
+GPS points remain immutable and no synthetic point is inserted. Gaps below 15 seconds stay in the
+same trace. Gaps from 15 through 120 seconds remain matchable but carry `gps_gap_medium` metadata
+for audit and confidence gating. Gaps over 120 seconds split the trace before OSRM; the following
+matched segment has `gap_before=true` and `reason_code=gps_gap_long_split`, so rendering never draws
+a straight connector across the missing interval. Planned edges fully inside a gap are marked
+unobserved and Bypass Detection returns `gps_gap` instead of a confirmed bypass.
+
 ## OSRM map matching
 
 Offline cleaned traces are sent only to the pinned, self-hosted OSRM Match API. Each OSRM sub-trace

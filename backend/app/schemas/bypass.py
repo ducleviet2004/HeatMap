@@ -1,4 +1,4 @@
-"""Các schema dùng khi so sánh planned route với actual matched route."""
+"""Schema dung khi so sanh planned route voi actual matched route."""
 
 from enum import StrEnum
 
@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class BypassReason(StrEnum):
-    """Lý do một missing edge run được hoặc không được xác nhận là bypass."""
+    """Reason code cho biet missing run co duoc confirm la bypass hay khong."""
 
     CONFIRMED_BYPASS = "confirmed_bypass"
     ROUTING_VERSION_MISMATCH = "routing_version_mismatch"
@@ -18,7 +18,7 @@ class BypassReason(StrEnum):
 
 
 class PlannedRoadEdge(BaseModel):
-    """Một edge của planned route cùng dữ liệu cần cho các rule BR-02."""
+    """Planned road edge va metadata can cho BR-02 rules."""
 
     edge_id: str
     length_m: float = Field(gt=0)
@@ -27,7 +27,7 @@ class PlannedRoadEdge(BaseModel):
 
 
 class BypassSegmentResult(BaseModel):
-    """Kết quả đánh giá một nhóm planned edge bị thiếu liên tiếp."""
+    """Ket qua danh gia mot nhom planned edge bi thieu lien tiep."""
 
     start_planned_index: int
     end_planned_index: int
@@ -40,7 +40,7 @@ class BypassSegmentResult(BaseModel):
 
 
 class EdgeSequenceComparisonResult(BaseModel):
-    """Kết quả so sánh ordered road-edge sequence của một route."""
+    """Ket qua so sanh ordered road-edge sequence cua mot route."""
 
     missing_edge_count: int
     confirmed_bypass_count: int

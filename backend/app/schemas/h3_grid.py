@@ -1,4 +1,4 @@
-"""Schema cho bước chuyển bypass geometry thành các ô H3."""
+"""Schema cho buoc convert bypass geometry thanh H3 cell."""
 
 from uuid import UUID
 
@@ -6,14 +6,14 @@ from pydantic import BaseModel, Field
 
 
 class BypassGeometry(BaseModel):
-    """Một LineString đã được B03 xác nhận là bypass."""
+    """LineString da duoc task B03 confirm la bypass."""
 
     coordinates: list[tuple[float, float]] = Field(min_length=2)
     confirmed: bool = True
 
 
 class TripRouteHexRecord(BaseModel):
-    """Bản ghi sẵn sàng để lưu vào bảng trip_route_hexes."""
+    """Record san sang de luu vao table trip_route_hexes."""
 
     trip_id: UUID
     planned_route_id: UUID
@@ -24,7 +24,7 @@ class TripRouteHexRecord(BaseModel):
 
 
 class H3ConversionResult(BaseModel):
-    """Kết quả đã khử trùng lặp theo trip, hex và resolution."""
+    """Ket qua da deduplicate theo trip, hex va resolution."""
 
     records: list[TripRouteHexRecord]
 

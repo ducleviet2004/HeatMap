@@ -182,6 +182,30 @@ async def test_preserves_split_subtraces_and_uses_lowest_confidence() -> None:
 
 
 @pytest.mark.asyncio
+async def test_long_gps_gap_is_matched_as_separate_segments() -> None:
+    service = MapMatchingService(
+        StubOsrmClient(successful_response()),
+        routing_data_version="routing-v1",
+        algorithm_version="algorithm-v1",
+    )
+
+    result = await service.match(
+        [
+            make_event(0, recorded_at=STARTED_AT),
+            make_event(1, recorded_at=STARTED_AT + timedelta(seconds=10)),
+            make_event(2, recorded_at=STARTED_AT + timedelta(seconds=131)),
+            make_event(3, recorded_at=STARTED_AT + timedelta(seconds=140)),
+        ]
+    )
+
+    assert len(result.segments) == 2
+    assert result.segments[0].gap_before is False
+    assert result.segments[1].gap_before is True
+    assert result.segments[1].reason_code == "gps_gap_long_split"
+    assert result.gps_gaps[0].reason_code == "gps_gap_long_split"
+
+
+@pytest.mark.asyncio
 async def test_reports_no_match_without_fabricating_edges() -> None:
     service = MapMatchingService(
         StubOsrmClient({"code": "NoMatch", "message": "Could not match the trace."}),

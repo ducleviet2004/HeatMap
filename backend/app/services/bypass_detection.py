@@ -1,4 +1,4 @@
-"""So sánh ordered road-edge sequence và xác định bypass theo BR-01, BR-02."""
+"""So sanh ordered road-edge sequence va xac dinh bypass theo BR-01, BR-02."""
 
 from collections.abc import Sequence
 
@@ -12,7 +12,7 @@ from app.schemas.bypass import (
 
 
 class BypassDetectionService:
-    """Tìm planned edge bị thiếu và kiểm tra các điều kiện xác nhận bypass."""
+    """Tim planned edge bi thieu va kiem tra cac dieu kien confirm bypass."""
 
     def __init__(
         self,
@@ -38,7 +38,7 @@ class BypassDetectionService:
 
     @classmethod
     def from_settings(cls, settings: Settings) -> "BypassDetectionService":
-        """Lấy threshold và version từ cấu hình ứng dụng."""
+        """Lay threshold va version tu application Settings."""
         return cls(
             minimum_match_confidence=settings.bypass_min_match_confidence,
             minimum_missing_run_m=settings.bypass_min_missing_run_m,
@@ -56,7 +56,7 @@ class BypassDetectionService:
         actual_routing_data_version: str,
         map_match_confidence: float,
     ) -> EdgeSequenceComparisonResult:
-        """So sánh hai edge sequence và đánh giá từng missing run."""
+        """So sanh planned/actual edge sequence va danh gia tung missing run."""
         if not 0 <= map_match_confidence <= 1:
             raise ValueError("map_match_confidence must be between 0 and 1")
 
@@ -95,11 +95,11 @@ class BypassDetectionService:
         versions_match: bool,
         map_match_confidence: float,
     ) -> BypassSegmentResult:
-        """Chạy lần lượt các cổng an toàn BR-02 cho một missing run."""
+        """Chay lan luot cac BR-02 safety gate cho mot missing run."""
         missing_length_m = sum(edge.length_m for edge in edges)
         average_deviation_m = self._weighted_corridor_distance(edges)
 
-        # Thứ tự kiểm tra giúp reason_code luôn ổn định và dễ giải thích.
+        # Thu tu check giup reason_code on dinh va de debug.
         if not versions_match:
             reason = BypassReason.ROUTING_VERSION_MISMATCH
         elif map_match_confidence < self.minimum_match_confidence:
@@ -111,7 +111,7 @@ class BypassDetectionService:
         elif average_deviation_m is None:
             reason = BypassReason.CORRIDOR_DATA_MISSING
         elif average_deviation_m <= self.corridor_tolerance_m:
-            # Edge ID khác nhưng geometry vẫn cùng hành lang thường là GPS drift hoặc graph khác.
+            # Edge ID khac nhung cung corridor thuong la GPS drift hoac graph khac.
             reason = BypassReason.SAME_CORRIDOR
         else:
             reason = BypassReason.CONFIRMED_BYPASS
@@ -128,7 +128,7 @@ class BypassDetectionService:
 
     @staticmethod
     def _weighted_corridor_distance(edges: Sequence[PlannedRoadEdge]) -> float | None:
-        """Tính distance trung bình theo chiều dài edge; thiếu dữ liệu thì không tự xác nhận."""
+        """Tinh weighted distance theo edge length; thieu data thi khong auto-confirm."""
         if any(edge.corridor_distance_m is None for edge in edges):
             return None
         total_length = sum(edge.length_m for edge in edges)
@@ -144,7 +144,7 @@ class BypassDetectionService:
         planned_edge_ids: Sequence[str],
         actual_edge_ids: Sequence[str],
     ) -> set[int]:
-        """Dùng LCS để match đúng thứ tự, kể cả khi route có edge lặp."""
+        """Dung LCS de match dung thu tu, ke ca khi route co duplicate edge."""
         planned_count = len(planned_edge_ids)
         actual_count = len(actual_edge_ids)
         lcs_lengths = [[0 for _ in range(actual_count + 1)] for _ in range(planned_count + 1)]
@@ -184,7 +184,7 @@ class BypassDetectionService:
         planned_edge_count: int,
         matched_indices: set[int],
     ) -> list[tuple[int, int]]:
-        """Gom các planned edge bị thiếu liền nhau thành từng bypass candidate."""
+        """Gom planned edge bi thieu lien nhau thanh tung bypass candidate."""
         missing_indices = [
             index for index in range(planned_edge_count) if index not in matched_indices
         ]

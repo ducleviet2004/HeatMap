@@ -1,4 +1,4 @@
-"""Chuyển các bypass LineString đã xác nhận sang H3 resolution 9-12."""
+"""Chuyen confirmed bypass LineString sang H3 resolution 9-12."""
 
 from math import asin, cos, radians, sin, sqrt
 from uuid import UUID
@@ -11,7 +11,7 @@ EARTH_RADIUS_M = 6_371_008.8
 
 
 class BypassH3Service:
-    """Phủ bypass bằng H3 và chỉ tạo một record cho mỗi trip/hex/resolution."""
+    """Phu bypass bang H3 va chi tao mot record cho moi trip/hex/resolution."""
 
     def __init__(
         self,
@@ -31,7 +31,7 @@ class BypassH3Service:
         planned_route_id: UUID,
         bypass_segments: list[BypassGeometry],
     ) -> H3ConversionResult:
-        """Chuyển tất cả segment confirmed và deduplicate trước khi ghi database."""
+        """Convert confirmed segment va deduplicate truoc khi ghi database."""
         unique_cells: set[tuple[int, str]] = set()
 
         for segment in bypass_segments:
@@ -55,7 +55,7 @@ class BypassH3Service:
 
     @classmethod
     def _line_cells(cls, coordinates: list[tuple[float, float]], resolution: int) -> set[str]:
-        """Lấy cell dọc LineString; điểm mẫu cách nhau tối đa nửa cạnh H3."""
+        """Lay cell doc LineString; sample point cach nhau toi da nua canh H3."""
         spacing_m = h3.average_hexagon_edge_length(resolution, unit="m") / 2
         cells: set[str] = set()
         previous_cell: str | None = None
@@ -70,19 +70,19 @@ class BypassH3Service:
                 cell = h3.latlng_to_cell(latitude, longitude, resolution)
                 cells.add(cell)
 
-                # Nối hai cell mẫu để không bỏ sót ô khi đường cắt qua biên H3.
+                # Noi hai sample cell de khong bo sot cell khi line cat qua H3 boundary.
                 if previous_cell is not None and previous_cell != cell:
                     try:
                         cells.update(h3.grid_path_cells(previous_cell, cell))
                     except h3.H3FailedError:
-                        # Vẫn giữ điểm mẫu nếu H3 không tìm được path gần pentagon.
+                        # Van giu sample cell neu H3 khong tim duoc path gan pentagon.
                         pass
                 previous_cell = cell
         return cells
 
     @staticmethod
     def _distance_m(start: tuple[float, float], end: tuple[float, float]) -> float:
-        """Tính khoảng cách Haversine vì tọa độ đầu vào là WGS84 lon/lat."""
+        """Tinh Haversine distance vi input coordinate la WGS84 lon/lat."""
         lon1, lat1 = start
         lon2, lat2 = end
         delta_lat = radians(lat2 - lat1)
