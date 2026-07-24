@@ -11,7 +11,7 @@ from starlette.exceptions import HTTPException
 
 from app.adapters.osrm import OsrmClient
 from app.adapters.redis_streams import RedisStreams
-from app.api.routes import health, planned_routes, trips, version
+from app.api.routes import health, heatmap, planned_routes, trips, version
 from app.core.config import get_settings
 from app.core.database import Database
 from app.core.logging import configure_logging
@@ -53,6 +53,7 @@ app.include_router(health.router, prefix="/api/v1")
 app.include_router(version.router, prefix="/api/v1")
 app.include_router(trips.router, prefix="/api/v1")
 app.include_router(planned_routes.router, prefix="/api/v1")
+app.include_router(heatmap.router, prefix="/api/v1")
 
 
 @app.middleware("http")
