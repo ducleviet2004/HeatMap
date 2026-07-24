@@ -2,7 +2,7 @@
 
 import math
 
-import h3  # type: ignore[import-untyped]
+import h3
 
 MIN_H3_RESOLUTION = 9
 MAX_H3_RESOLUTION = 12
