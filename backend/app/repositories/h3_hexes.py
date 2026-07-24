@@ -102,3 +102,23 @@ class H3HexRepository:
             )
 
         return aggregates
+
+    async def get_heatmap_features(
+        self,
+        h3_resolution: int = 9,
+        start_time: datetime | None = None,
+        end_time: datetime | None = None,
+        algorithm_version: str = "v1",
+    ) -> list[H3Aggregate]:
+        """Query h3_aggregates with optional time range and resolution filters."""
+        stmt = select(H3Aggregate).where(
+            H3Aggregate.h3_resolution == h3_resolution,
+            H3Aggregate.algorithm_version == algorithm_version,
+        )
+        if start_time is not None:
+            stmt = stmt.where(H3Aggregate.bucket_start >= start_time)
+        if end_time is not None:
+            stmt = stmt.where(H3Aggregate.bucket_start <= end_time)
+        stmt = stmt.order_by(H3Aggregate.bucket_start)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())

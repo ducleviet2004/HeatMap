@@ -1,9 +1,10 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from unittest.mock import MagicMock
 
 from fastapi.testclient import TestClient
 
-from app.api.dependencies import get_readiness_service
+from app.api.dependencies import get_readiness_service, get_session
 from app.main import app
 from app.schemas.status import DependencyStatus, ReadinessResponse
 
@@ -22,6 +23,21 @@ class StubReadiness:
         )
 
 
+class MockSession:
+    async def __aenter__(self) -> "MockSession":
+        return self
+
+    async def __aexit__(self, *args: object) -> None:
+        pass
+
+    async def execute(self, stmt: object) -> MagicMock:
+        return MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[]))))
+
+
+async def mock_get_session() -> AsyncIterator[MockSession]:
+    yield MockSession()
+
+
 @asynccontextmanager
 async def no_lifespan(_app: object) -> AsyncIterator[None]:
     yield
@@ -29,6 +45,7 @@ async def no_lifespan(_app: object) -> AsyncIterator[None]:
 
 app.router.lifespan_context = no_lifespan
 app.dependency_overrides[get_readiness_service] = lambda: StubReadiness()
+app.dependency_overrides[get_session] = mock_get_session
 
 
 def test_health_contract() -> None:
