@@ -5,11 +5,12 @@ import logging
 import math
 import random
 from datetime import UTC, datetime, timedelta
+from typing import Any
 from uuid import uuid4
 
 from geoalchemy2.shape import from_shape
 from shapely.geometry import LineString, Point
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, insert
 from sqlalchemy.orm import sessionmaker
 
 from app.core.config import get_settings
@@ -43,7 +44,7 @@ WAYPOINT_CORRIDORS = [
 ]
 
 
-def generate_drivers(count: int = 100) -> list[dict]:
+def generate_drivers(count: int = 100) -> list[dict[str, Any]]:
     """Generate mock driver dicts."""
     drivers = []
     for i in range(1, count + 1):
@@ -57,7 +58,7 @@ def generate_drivers(count: int = 100) -> list[dict]:
     return drivers
 
 
-def generate_trips(drivers: list[dict], count: int = 500) -> list[dict]:
+def generate_trips(drivers: list[dict[str, Any]], count: int = 500) -> list[dict[str, Any]]:
     """Generate mock trip dicts distributed among drivers."""
     trips = []
     statuses = ["completed", "completed", "completed", "active"]
@@ -73,7 +74,7 @@ def generate_trips(drivers: list[dict], count: int = 500) -> list[dict]:
     return trips
 
 
-def generate_planned_routes(trips: list[dict]) -> list[dict]:
+def generate_planned_routes(trips: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Generate planned route geometries for each trip."""
     routes = []
     for trip in trips:
@@ -104,10 +105,10 @@ def interpolated_points_between(
 
 
 def generate_gps_events_batch(
-    routes: list[dict], total_events_needed: int, start_seq: int = 1
-) -> list[dict]:
+    routes: list[dict[str, Any]], total_events_needed: int, start_seq: int = 1
+) -> list[dict[str, Any]]:
     """Generate a batch of realistic GPS events along planned routes."""
-    events = []
+    events: list[dict[str, Any]] = []
     events_per_route = max(1, math.ceil(total_events_needed / len(routes)))
     base_time = datetime.now(UTC) - timedelta(days=7)
 
@@ -197,13 +198,13 @@ def seed_large_dataset(
         # 1. Generate Drivers
         logger.info("Generating %d drivers...", driver_count)
         drivers_data = generate_drivers(driver_count)
-        session.bulk_insert_mappings(Driver, drivers_data)
+        session.execute(insert(Driver), drivers_data)
         session.flush()
 
         # 2. Generate Trips
         logger.info("Generating %d trips...", trip_count)
         trips_data = generate_trips(drivers_data, trip_count)
-        session.bulk_insert_mappings(Trip, trips_data)
+        session.execute(insert(Trip), trips_data)
         session.flush()
 
         # 3. Generate Planned Routes
@@ -220,7 +221,7 @@ def seed_large_dataset(
                     "ordered_edge_ids": r["ordered_edge_ids"],
                 }
             )
-        session.bulk_insert_mappings(PlannedRoute, db_routes)
+        session.execute(insert(PlannedRoute), db_routes)
         session.flush()
         session.commit()
 
@@ -236,7 +237,7 @@ def seed_large_dataset(
             chunk_needed = min(batch_size, target_points - total_inserted)
             events_chunk = generate_gps_events_batch(routes_data, chunk_needed)
 
-            session.bulk_insert_mappings(GPSEvent, events_chunk)
+            session.execute(insert(GPSEvent), events_chunk)
             session.commit()
 
             total_inserted += len(events_chunk)

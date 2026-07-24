@@ -68,4 +68,4 @@ def test_seed_large_dataset_mock(
     assert result["drivers"] == 5
     assert result["trips"] == 10
     assert result["gps_events"] == 500
-    assert mock_session.bulk_insert_mappings.call_count >= 3
+    assert mock_session.execute.call_count >= 3
