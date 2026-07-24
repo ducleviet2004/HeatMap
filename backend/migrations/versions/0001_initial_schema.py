@@ -276,11 +276,27 @@ def upgrade() -> None:
         sa.Column("bucket_size", sa.String(32), nullable=False),
         sa.Column("hex_id", sa.String(64), nullable=False),
         sa.Column("h3_resolution", sa.SmallInteger(), nullable=False),
-        sa.Column("eligible_trip_count", sa.BigInteger(), nullable=False, server_default=sa.text("0")),
-        sa.Column("bypass_trip_count", sa.BigInteger(), nullable=False, server_default=sa.text("0")),
-        sa.Column("unique_driver_count", sa.BigInteger(), nullable=False, server_default=sa.text("0")),
-        sa.Column("bypass_unique_driver_count", sa.BigInteger(), nullable=False, server_default=sa.text("0")),
-        sa.Column("average_deviation_distance_m", sa.Float(), nullable=False, server_default=sa.text("0.0")),
+        sa.Column(
+            "eligible_trip_count", sa.BigInteger(), nullable=False, server_default=sa.text("0")
+        ),
+        sa.Column(
+            "bypass_trip_count", sa.BigInteger(), nullable=False, server_default=sa.text("0")
+        ),
+        sa.Column(
+            "unique_driver_count", sa.BigInteger(), nullable=False, server_default=sa.text("0")
+        ),
+        sa.Column(
+            "bypass_unique_driver_count",
+            sa.BigInteger(),
+            nullable=False,
+            server_default=sa.text("0"),
+        ),
+        sa.Column(
+            "average_deviation_distance_m",
+            sa.Float(),
+            nullable=False,
+            server_default=sa.text("0.0"),
+        ),
         sa.Column("algorithm_version", sa.String(64), nullable=False),
         sa.Column(
             "refreshed_at",
@@ -313,4 +329,3 @@ def downgrade() -> None:
     op.drop_table("planned_routes")
     op.drop_table("trips")
     op.drop_table("drivers")
-

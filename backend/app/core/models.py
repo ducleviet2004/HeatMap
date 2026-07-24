@@ -45,9 +45,7 @@ class Driver(Base, TimestampMixin):
 
     __tablename__ = "drivers"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     external_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     display_name: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False)
@@ -60,9 +58,7 @@ class Trip(Base, TimestampMixin):
 
     __tablename__ = "trips"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     external_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     driver_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -95,9 +91,7 @@ class PlannedRoute(Base):
         UniqueConstraint("trip_id", "route_version", name="uq_planned_route_version"),
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     trip_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("trips.id", ondelete="CASCADE"), nullable=False
     )
@@ -123,9 +117,7 @@ class GPSEvent(Base):
     """Immutable raw GPS event coordinates recorded during a trip."""
 
     __tablename__ = "gps_events"
-    __table_args__ = (
-        UniqueConstraint("trip_id", "sequence_no", name="uq_gps_trip_sequence"),
-    )
+    __table_args__ = (UniqueConstraint("trip_id", "sequence_no", name="uq_gps_trip_sequence"),)
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     event_id: Mapped[uuid.UUID] = mapped_column(
@@ -160,9 +152,7 @@ class MatchedSegment(Base):
 
     __tablename__ = "matched_segments"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     trip_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("trips.id", ondelete="CASCADE"),
@@ -195,9 +185,7 @@ class TripBypassSegment(Base):
 
     __tablename__ = "trip_bypass_segments"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     trip_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("trips.id", ondelete="CASCADE"),
@@ -284,15 +272,9 @@ class H3Aggregate(Base):
     bucket_size: Mapped[str] = mapped_column(String(32), nullable=False)
     hex_id: Mapped[str] = mapped_column(String(64), nullable=False)
     h3_resolution: Mapped[int] = mapped_column(SmallInteger, nullable=False)
-    eligible_trip_count: Mapped[int] = mapped_column(
-        BigInteger, nullable=False, server_default="0"
-    )
-    bypass_trip_count: Mapped[int] = mapped_column(
-        BigInteger, nullable=False, server_default="0"
-    )
-    unique_driver_count: Mapped[int] = mapped_column(
-        BigInteger, nullable=False, server_default="0"
-    )
+    eligible_trip_count: Mapped[int] = mapped_column(BigInteger, nullable=False, server_default="0")
+    bypass_trip_count: Mapped[int] = mapped_column(BigInteger, nullable=False, server_default="0")
+    unique_driver_count: Mapped[int] = mapped_column(BigInteger, nullable=False, server_default="0")
     bypass_unique_driver_count: Mapped[int] = mapped_column(
         BigInteger, nullable=False, server_default="0"
     )

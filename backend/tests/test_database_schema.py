@@ -1,18 +1,13 @@
 """Unit tests for PostGIS database schema and SQLAlchemy ORM models."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-import pytest
 from app.core.models import (
     Base,
     Driver,
-    GPSEvent,
     H3Aggregate,
-    MatchedSegment,
-    PlannedRoute,
     Trip,
-    TripBypassSegment,
     TripRouteHex,
 )
 
@@ -52,7 +47,7 @@ def test_trip_model_instantiation() -> None:
     """Verify Trip model creation."""
     trip_id = uuid.uuid4()
     driver_id = uuid.uuid4()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     trip = Trip(
         id=trip_id,
         external_id="TRIP-100",
@@ -84,7 +79,7 @@ def test_trip_route_hex_model_instantiation() -> None:
 
 def test_h3_aggregate_model_instantiation() -> None:
     """Verify H3Aggregate model creation."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     agg = H3Aggregate(
         bucket_start=now,
         bucket_size="1h",
