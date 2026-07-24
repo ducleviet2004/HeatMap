@@ -58,8 +58,8 @@ async def test_gps_cleaning_precision_recall_benchmark() -> None:
     false_negatives = 0  # Bỏ sót điểm nhiễu (cho điểm nhiễu qua)
 
     for scenario in LABELED_TEST_SET:
-        decision = cleaning_service.clean_events(scenario.events)
-        accepted_ids = {e.event_id for e in decision.accepted_events}
+        accepted_events = cleaning_service.filter_events(scenario.events)
+        accepted_ids = {e.event_id for e in accepted_events}
 
         for idx, event in enumerate(scenario.events):
             is_ground_truth_rejected = idx in scenario.expected_rejected_indices
@@ -134,15 +134,15 @@ async def test_overall_system_correctness_benchmark() -> None:
 
     for scenario in LABELED_TEST_SET:
         # Bước 1: Cleaning
-        decision = cleaning_service.clean_events(scenario.events)
+        accepted_events = cleaning_service.filter_events(scenario.events)
         total_evaluated_points += len(scenario.events)
 
-        if len(decision.accepted_events) == scenario.expected_clean_count:
+        if len(accepted_events) == scenario.expected_clean_count:
             correctly_handled_points += len(scenario.events)
 
         # Bước 2: Map Matching
-        if len(decision.accepted_events) >= 2:
-            match_res = await matching_service.match(decision.accepted_events)
+        if len(accepted_events) >= 2:
+            match_res = await matching_service.match(accepted_events)
             assert match_res.status == MapMatchStatus.MATCHED
 
     overall_accuracy = correctly_handled_points / total_evaluated_points
