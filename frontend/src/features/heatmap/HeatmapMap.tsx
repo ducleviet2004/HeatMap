@@ -13,6 +13,7 @@ interface HeatmapMapProps {
 const VIETNAM_CENTER: [number, number] = [106.5, 16.2];
 
 export function HeatmapMap({ cells, onHover }: HeatmapMapProps) {
+  // mapRef va overlayRef giu instance giua cac lan React re-render.
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const overlayRef = useRef<MapboxOverlay | null>(null);
@@ -20,6 +21,7 @@ export function HeatmapMap({ cells, onHover }: HeatmapMapProps) {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    // MapLibre ve basemap OSM; Deck.gl overlay se ve H3 layer o phia tren.
     const map = new maplibregl.Map({
       container: containerRef.current,
       center: VIETNAM_CENTER,
@@ -47,6 +49,7 @@ export function HeatmapMap({ cells, onHover }: HeatmapMapProps) {
     overlayRef.current = overlay;
 
     return () => {
+      // Cleanup WebGL resource khi component unmount de tranh memory leak.
       overlay.finalize();
       map.remove();
       overlayRef.current = null;
@@ -55,6 +58,7 @@ export function HeatmapMap({ cells, onHover }: HeatmapMapProps) {
   }, []);
 
   useEffect(() => {
+    // Chuan hoa volume theo cell lon nhat de tao color scale de doc.
     const maximum = Math.max(...cells.map((cell) => cell.bypassVolume), 0);
     const layer = new H3HexagonLayer<H3Cell>({
       id: "bypass-h3-cells",
@@ -62,6 +66,7 @@ export function HeatmapMap({ cells, onHover }: HeatmapMapProps) {
       pickable: true,
       extruded: false,
       getHexagon: (cell) => cell.hexId,
+      // bypassVolume cang lon thi mau cell cang dam.
       getFillColor: (cell) => volumeColor(cell.bypassVolume, maximum),
       getLineColor: [255, 232, 176, 180],
       getLineWidth: 1,

@@ -1,14 +1,15 @@
-"""Các schema kết quả của OSRM Map Matching."""
+"""Schema cho ket qua OSRM Map Matching."""
 
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
+from app.schemas.gps import GpsGapRecord
 from app.schemas.routes import GeoJsonLineString
 
 
 class MapMatchStatus(StrEnum):
-    """Trạng thái của một lần map matching."""
+    """Trang thai cua mot lan Map Matching."""
 
     MATCHED = "matched"
     NO_MATCH = "no_match"
@@ -17,7 +18,7 @@ class MapMatchStatus(StrEnum):
 
 
 class MatchedRoadEdge(BaseModel):
-    """Một đoạn đường có hướng, ví dụ node ``A->B``."""
+    """Road edge co huong, vi du node ``A->B``."""
 
     edge_id: str
     from_node_id: int
@@ -25,16 +26,18 @@ class MatchedRoadEdge(BaseModel):
 
 
 class MatchedTraceSegment(BaseModel):
-    """Một đoạn trace liên tục mà OSRM match được."""
+    """Trace segment lien tuc ma OSRM match duoc."""
 
     segment_no: int
     match_confidence: float = Field(ge=0.0, le=1.0)
     geometry: GeoJsonLineString
     ordered_road_edges: list[MatchedRoadEdge]
+    gap_before: bool = False
+    reason_code: str | None = None
 
 
 class MapMatchResult(BaseModel):
-    """Kết quả map matching của toàn bộ offline trace."""
+    """Ket qua Map Matching cua toan bo offline trace."""
 
     status: MapMatchStatus
     match_confidence: float | None = Field(default=None, ge=0.0, le=1.0)
@@ -44,3 +47,4 @@ class MapMatchResult(BaseModel):
     algorithm_version: str
     reason_code: str | None = None
     fallback_radius_m: float | None = None
+    gps_gaps: list[GpsGapRecord] = Field(default_factory=list)

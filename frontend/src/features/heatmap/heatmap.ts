@@ -7,6 +7,7 @@ export interface H3Cell {
 }
 
 export function toH3Cells(features: HeatmapFeature[]): H3Cell[] {
+  // Chuyen API GeoJSON feature thanh data format ma Deck.gl H3 layer can.
   return features.flatMap((feature) => {
     const { hex_id, h3_resolution, bypass_trip_count, heat_weight } =
       feature.properties;
@@ -26,6 +27,7 @@ export function volumeColor(
   volume: number,
   maximum: number,
 ): [number, number, number, number] {
+  // Clamp ratio trong khoang 0..1 de RGBA color luon hop le.
   const ratio = maximum > 0 ? Math.min(Math.max(volume / maximum, 0), 1) : 0;
   return [
     Math.round(255 - ratio * 20),
