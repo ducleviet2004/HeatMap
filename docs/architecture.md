@@ -27,6 +27,15 @@ configuration version in every decision. Filtering returns references to accepte
 updating raw geometry or measurements. Persisting cleaning decisions is outside this slice and
 would require a new Alembic migration.
 
+## OSRM map matching
+
+Offline cleaned traces are sent only to the pinned, self-hosted OSRM Match API. Each OSRM sub-trace
+remains a separate matched segment so GPS gaps are not bridged. The ordered road-edge sequence is
+derived from directed consecutive OSM node pairs returned by `annotations=nodes`; duplicate
+annotation overlap at leg boundaries is removed. Each segment retains OSRM's confidence, while the
+trace-level `match_confidence` is the minimum segment confidence. Results always carry routing-data
+and algorithm versions because edge identity is snapshot-dependent.
+
 ## Data model
 
 `drivers` own `trips`; each trip has versioned `planned_routes` and immutable `gps_events`.
