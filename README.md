@@ -22,12 +22,16 @@ Open the System Status console at <http://localhost:5173/status>, API docs at
 <http://localhost:8000/docs>, and health at <http://localhost:8000/api/v1/health>. With no routing
 graph, readiness is intentionally `degraded` and OSRM is `not_configured`.
 
-To enable a prepared local graph, follow [OSRM data instructions](osrm/data/README.md), set
-`OSRM_URL=http://osrm:5000`, and run:
+To install the pinned Vietnam routing graph, create the local environment configuration, start the
+routing profile, and verify the services, run this from PowerShell:
 
-```sh
-docker compose --profile routing up --build
+```powershell
+.\scripts\setup-osrm.ps1
 ```
+
+The script is safe to rerun and reuses a verified download and completed graph. Pass `-Force` only
+when the graph must be rebuilt. See [OSRM data instructions](osrm/data/README.md) for storage,
+provenance, and manual-operation details.
 
 ## Local checks
 
@@ -50,4 +54,3 @@ versioned Stream publishing, status UI, CI, and a k6 reachability smoke test.
 Not available: GPS ingestion, cleaning/windowing, map matching, ordered road-edge comparison,
 bypass detection, H3 aggregation, heatmap/query APIs, production authentication, or the real
 performance benchmark. No 1,000 req/s claim has been made.
-
