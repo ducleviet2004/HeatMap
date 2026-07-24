@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir .
 
 FROM base AS test
 COPY tests ./tests
+COPY scripts ./scripts
 RUN pip install --no-cache-dir ".[dev]"
 RUN ruff format --check . && ruff check . && mypy app && pytest
 
@@ -17,4 +18,3 @@ RUN useradd --create-home --uid 10001 appuser && chown -R appuser:appuser /app
 USER appuser
 EXPOSE 8000
 CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
-
