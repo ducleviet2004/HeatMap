@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 
 from geoalchemy2.shape import from_shape
-from shapely.geometry import LineString, Point  # type: ignore[import-untyped]
+from shapely.geometry import LineString, Point
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 

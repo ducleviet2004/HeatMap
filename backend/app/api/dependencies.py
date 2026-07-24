@@ -1,5 +1,5 @@
 from collections.abc import AsyncIterator
-from typing import Annotated
+from typing import Annotated, cast
 
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,7 +10,7 @@ from app.services.trips import TripService
 
 
 def get_readiness_service(request: Request) -> ReadinessService:
-    return request.app.state.readiness_service  # type: ignore[no-any-return]
+    return cast(ReadinessService, request.app.state.readiness_service)
 
 
 async def get_session(request: Request) -> AsyncIterator[AsyncSession]:
