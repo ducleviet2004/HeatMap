@@ -3,7 +3,7 @@ from uuid import UUID
 
 from geoalchemy2 import WKBElement
 from geoalchemy2.shape import from_shape, to_shape
-from shapely.geometry import mapping, shape
+from shapely.geometry import mapping, shape  # type: ignore[import-untyped]
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

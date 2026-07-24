@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     git_sha: str = "unknown"
     algorithm_version: str = "unimplemented"
     threshold_config_version: str = "v1"
+    gps_max_accuracy_m: float = Field(default=30.0, gt=0)
+    gps_max_speed_kmh: float = Field(default=120.0, gt=0)
     routing_data_version: str = "not_configured"
     database_url: str = (
         "postgresql+psycopg://route_app:route_dev_only@localhost:5432/route_deviation"

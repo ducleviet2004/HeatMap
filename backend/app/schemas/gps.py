@@ -1,10 +1,30 @@
+"""Các schema dùng cho dữ liệu GPS và kết quả GPS Cleaning."""
+
 from datetime import datetime
+from enum import StrEnum
 from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
 
+class GpsRejectionReason(StrEnum):
+    """Lý do một điểm GPS bị loại."""
+
+    POOR_ACCURACY = "poor_accuracy"
+    EXCESSIVE_SPEED = "excessive_speed"
+
+
+class GpsCleaningResult(BaseModel):
+    """Kết quả kiểm tra chất lượng của một điểm GPS."""
+
+    accepted: bool
+    reasons: tuple[GpsRejectionReason, ...] = ()
+    threshold_config_version: str
+
+
 class GeoJsonPoint(BaseModel):
+    """Một tọa độ GeoJSON có dạng ``[kinh độ, vĩ độ]``."""
+
     type: str = "Point"
     coordinates: list[float]
 
@@ -17,6 +37,8 @@ class GeoJsonPoint(BaseModel):
 
 
 class GpsEventCreate(BaseModel):
+    """Dữ liệu GPS thô được gửi vào hệ thống."""
+
     event_id: UUID
     trip_id: UUID
     driver_id: UUID
@@ -30,6 +52,8 @@ class GpsEventCreate(BaseModel):
 
 
 class GpsEventResponse(BaseModel):
+    """Dữ liệu GPS thô trả về sau khi lưu database."""
+
     id: int
     event_id: UUID
     trip_id: UUID
