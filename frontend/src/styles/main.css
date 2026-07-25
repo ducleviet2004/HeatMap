@@ -338,6 +338,132 @@ footer {
   font-size: 13px;
   line-height: 1.7;
 }
+.map-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid #294037;
+  background: rgba(7, 17, 13, 0.72);
+}
+.control-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #9cb0a6;
+  font: 500 10px "DM Mono";
+  letter-spacing: 0.08em;
+}
+.control-heading small {
+  color: #71887d;
+  font-size: 8px;
+}
+.control-heading .response-ok {
+  color: #62e5a4;
+}
+.control-heading .response-slow {
+  color: #ff8f88;
+}
+.control-wide {
+  grid-column: 1 / -1;
+}
+.map-filters label > span {
+  display: block;
+  margin-bottom: 6px;
+  color: #647c71;
+  font: 500 8px "DM Mono";
+  letter-spacing: 0.08em;
+}
+.map-filters input,
+.map-filters select,
+.audit-panel input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  color: #d9e8df;
+  border: 1px solid #30463c;
+  border-radius: 0;
+  outline: none;
+  background: #091712;
+  font: 400 10px "DM Mono";
+}
+.map-filters input:focus,
+.map-filters select:focus,
+.audit-panel input:focus {
+  border-color: #4db987;
+}
+.map-filters select {
+  color-scheme: dark;
+}
+.control-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+.control-actions button,
+.audit-panel button {
+  padding: 9px 12px;
+  color: #62e5a4;
+  border: 1px solid #315b48;
+  background: rgba(63, 210, 139, 0.08);
+  font: 500 9px "DM Mono";
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+.control-actions button:last-child {
+  color: #81998e;
+  border-color: #30463c;
+  background: transparent;
+}
+.map-view-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 4px;
+  border: 1px solid #294037;
+  background: #07110d;
+}
+.map-view-toggle button {
+  min-width: 0;
+  padding: 12px;
+  color: #71887d;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+.map-view-toggle button:hover {
+  color: #c9d8d0;
+}
+.map-view-toggle button.is-active {
+  color: #62e5a4;
+  border-color: #315b48;
+  background: rgba(63, 210, 139, 0.1);
+}
+.map-view-toggle span,
+.map-view-toggle small {
+  display: block;
+  font-family: "DM Mono";
+}
+.map-view-toggle span {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.map-view-toggle small {
+  margin-top: 5px;
+  color: #61776d;
+  font-size: 8px;
+}
+.map-view-toggle button.is-active small {
+  color: #84a696;
+}
 .map-metrics {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -404,6 +530,69 @@ footer {
   background: transparent;
   cursor: pointer;
 }
+.audit-panel {
+  margin-top: 28px;
+  padding: 16px;
+  border: 1px solid #294037;
+  background: rgba(7, 17, 13, 0.72);
+}
+.audit-panel form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 14px;
+}
+.route-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+}
+.route-toggles label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #91a89d;
+  font-size: 10px;
+  cursor: pointer;
+}
+.route-toggles input {
+  accent-color: #62e5a4;
+}
+.route-swatch {
+  width: 18px;
+  height: 3px;
+  background: #3fdc9b;
+}
+.route-swatch--actual {
+  background: #ff7d2d;
+}
+.audit-panel > p {
+  margin: 14px 0 0;
+  color: #81998e;
+  font-size: 10px;
+}
+.audit-panel .audit-error {
+  color: #ff8f88;
+}
+.audit-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 14px 0 0;
+}
+.audit-summary div {
+  padding: 9px;
+  border: 1px solid #294037;
+}
+.audit-summary dt {
+  color: #71887d;
+  font-size: 9px;
+}
+.audit-summary dd {
+  margin: 6px 0 0;
+  color: #d9e8df;
+  font: 500 13px "DM Mono";
+}
 .hex-inspector {
   margin-top: 28px;
   padding: 4px 16px;
@@ -454,6 +643,31 @@ footer {
   font: 500 9px "DM Mono";
   letter-spacing: 0.1em;
   pointer-events: none;
+}
+.map-tooltip {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  min-width: 118px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 141, 56, 0.65);
+  background: rgba(7, 16, 13, 0.92);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+.map-tooltip strong {
+  color: #ff9a4d;
+  font: 600 18px "DM Mono";
+}
+.map-tooltip span {
+  margin-top: 2px;
+  color: #d9e8df;
+  font-size: 10px;
+}
+.map-tooltip small {
+  margin-top: 7px;
+  color: #71887d;
+  font: 400 8px "DM Mono";
 }
 .maplibregl-ctrl-group {
   overflow: hidden;

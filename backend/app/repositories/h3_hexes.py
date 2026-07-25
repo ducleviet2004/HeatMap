@@ -1,5 +1,6 @@
 """Repository xử lý lưu trữ và aggregate H3 Spatial Grid tuân thủ Deduplication Rule."""
 
+from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
@@ -7,7 +8,19 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import H3Aggregate, TripRouteHex
+from app.core.models import H3Aggregate, Trip, TripRouteHex
+
+
+@dataclass(frozen=True)
+class HeatmapAggregateResult:
+    """Data shape dung chung cho materialized aggregate va Driver filter query."""
+
+    hex_id: str
+    h3_resolution: int
+    eligible_trip_count: int
+    bypass_trip_count: int
+    unique_driver_count: int
+    average_deviation_distance_m: float
 
 
 class H3HexRepository:
@@ -108,9 +121,18 @@ class H3HexRepository:
         h3_resolution: int = 9,
         start_time: datetime | None = None,
         end_time: datetime | None = None,
+        driver_id: UUID | None = None,
         algorithm_version: str = "v1",
-    ) -> list[H3Aggregate]:
+    ) -> list[HeatmapAggregateResult]:
         """Query h3_aggregates with optional time range and resolution filters."""
+        if driver_id is not None:
+            return await self._get_driver_heatmap_features(
+                driver_id=driver_id,
+                h3_resolution=h3_resolution,
+                start_time=start_time,
+                end_time=end_time,
+            )
+
         stmt = select(H3Aggregate).where(
             H3Aggregate.h3_resolution == h3_resolution,
             H3Aggregate.algorithm_version == algorithm_version,
@@ -121,4 +143,60 @@ class H3HexRepository:
             stmt = stmt.where(H3Aggregate.bucket_start <= end_time)
         stmt = stmt.order_by(H3Aggregate.bucket_start)
         result = await self.session.execute(stmt)
-        return list(result.scalars().all())
+        return [
+            HeatmapAggregateResult(
+                hex_id=aggregate.hex_id,
+                h3_resolution=aggregate.h3_resolution,
+                eligible_trip_count=aggregate.eligible_trip_count,
+                bypass_trip_count=aggregate.bypass_trip_count,
+                unique_driver_count=aggregate.unique_driver_count,
+                average_deviation_distance_m=aggregate.average_deviation_distance_m,
+            )
+            for aggregate in result.scalars().all()
+        ]
+
+    async def _get_driver_heatmap_features(
+        self,
+        *,
+        driver_id: UUID,
+        h3_resolution: int,
+        start_time: datetime | None,
+        end_time: datetime | None,
+    ) -> list[HeatmapAggregateResult]:
+        """Aggregate live trip data khi filter theo Driver vi table aggregate khong co driver_id."""
+        bypass_count = func.count(func.distinct(TripRouteHex.trip_id)).filter(
+            TripRouteHex.is_bypass.is_(True)
+        )
+        stmt = (
+            select(
+                TripRouteHex.hex_id,
+                TripRouteHex.h3_resolution,
+                func.count(func.distinct(TripRouteHex.trip_id)),
+                bypass_count,
+                func.count(func.distinct(Trip.driver_id)),
+            )
+            .join(Trip, Trip.id == TripRouteHex.trip_id)
+            .where(
+                Trip.driver_id == driver_id,
+                TripRouteHex.h3_resolution == h3_resolution,
+            )
+            .group_by(TripRouteHex.hex_id, TripRouteHex.h3_resolution)
+            .order_by(TripRouteHex.hex_id)
+        )
+        if start_time is not None:
+            stmt = stmt.where(Trip.started_at >= start_time)
+        if end_time is not None:
+            stmt = stmt.where(Trip.started_at <= end_time)
+
+        result = await self.session.execute(stmt)
+        return [
+            HeatmapAggregateResult(
+                hex_id=str(row[0]),
+                h3_resolution=int(row[1]),
+                eligible_trip_count=int(row[2]),
+                bypass_trip_count=int(row[3]),
+                unique_driver_count=int(row[4]),
+                average_deviation_distance_m=0.0,
+            )
+            for row in result.all()
+        ]

@@ -23,6 +23,7 @@ class HeatmapService:
             h3_resolution=params.h3_resolution,
             start_time=params.start_time,
             end_time=params.end_time,
+            driver_id=params.driver_id,
         )
 
         total_bypass = 0
@@ -35,6 +36,8 @@ class HeatmapService:
             coordinates.append(coordinates[0])
 
             props = HeatmapFeaturePropertiesWithMetrics(
+                hex_id=agg.hex_id,
+                h3_resolution=agg.h3_resolution,
                 heat_weight=agg.eligible_trip_count,
                 display_weight=agg.bypass_trip_count,
                 bypass_trip_count=agg.bypass_trip_count,

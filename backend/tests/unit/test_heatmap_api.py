@@ -61,6 +61,8 @@ class TestHeatmapFeatureWithMetrics:
 
     def test_with_metrics(self) -> None:
         props = HeatmapFeaturePropertiesWithMetrics(
+            hex_id="8965b56642fffff",
+            h3_resolution=9,
             heat_weight=10.0,
             display_weight=5.0,
             bypass_trip_count=3,
@@ -69,6 +71,8 @@ class TestHeatmapFeatureWithMetrics:
             average_deviation_distance_m=25.5,
         )
         feat = HeatmapFeatureWithMetrics(properties=props)
+        assert feat.properties.hex_id == "8965b56642fffff"
+        assert feat.properties.h3_resolution == 9
         assert feat.properties.heat_weight == 10.0
         assert feat.properties.bypass_trip_count == 3
 
