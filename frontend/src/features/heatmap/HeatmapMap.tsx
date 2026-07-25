@@ -1,14 +1,25 @@
 import { H3HexagonLayer } from "@deck.gl/geo-layers";
+import { GeoJsonLayer } from "@deck.gl/layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import maplibregl from "maplibre-gl";
 import { useEffect, useRef } from "react";
+import type { RouteComparisonResponse } from "../../api/client";
 import type { H3Cell } from "./heatmap";
 import { volumeColor } from "./heatmap";
+
+export interface MapHoverInfo {
+  cell: H3Cell;
+  x: number;
+  y: number;
+}
 
 interface HeatmapMapProps {
   cells: H3Cell[];
   viewMode: HeatmapViewMode;
-  onHover: (cell: H3Cell | null) => void;
+  auditData?: RouteComparisonResponse;
+  showPlannedRoute: boolean;
+  showActualRoute: boolean;
+  onHover: (info: MapHoverInfo | null) => void;
 }
 
 export type HeatmapViewMode = "h3-grid" | "heat-blur";
@@ -90,7 +101,14 @@ function addHeatBlurLayer(map: maplibregl.Map) {
   });
 }
 
-export function HeatmapMap({ cells, viewMode, onHover }: HeatmapMapProps) {
+export function HeatmapMap({
+  cells,
+  viewMode,
+  auditData,
+  showPlannedRoute,
+  showActualRoute,
+  onHover,
+}: HeatmapMapProps) {
   // mapRef va overlayRef giu instance giua cac lan React re-render.
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -141,7 +159,7 @@ export function HeatmapMap({ cells, viewMode, onHover }: HeatmapMapProps) {
   useEffect(() => {
     // Chuan hoa volume theo cell lon nhat de tao color scale de doc.
     const maximum = Math.max(...cells.map((cell) => cell.bypassTripCount), 0);
-    const layer = new H3HexagonLayer<H3Cell>({
+    const h3Layer = new H3HexagonLayer<H3Cell>({
       id: "bypass-h3-cells",
       data: cells,
       pickable: viewMode === "h3-grid",
@@ -153,12 +171,47 @@ export function HeatmapMap({ cells, viewMode, onHover }: HeatmapMapProps) {
       getLineWidth: 1,
       lineWidthMinPixels: 0.7,
       opacity: viewMode === "h3-grid" ? 0.9 : 0,
-      onHover: ({ object }) => onHover(object ?? null),
+      onHover: ({ object, x, y }) =>
+        onHover(object ? { cell: object, x, y } : null),
       updateTriggers: { getFillColor: maximum },
       transitions: { opacity: 350 },
     });
-    overlayRef.current?.setProps({ layers: [layer] });
-  }, [cells, onHover, viewMode]);
+
+    const plannedLayer = new GeoJsonLayer({
+      id: "audit-planned-route",
+      data: auditData?.planned_route?.geometry,
+      visible: Boolean(auditData?.planned_route && showPlannedRoute),
+      pickable: false,
+      stroked: true,
+      filled: false,
+      getLineColor: [70, 220, 155, 235],
+      getLineWidth: 5,
+      lineWidthMinPixels: 3,
+    });
+
+    const actualLayer = new GeoJsonLayer({
+      id: "audit-actual-route",
+      data: auditData?.matched_segments.map((segment) => ({
+        type: "Feature" as const,
+        properties: {
+          confidence: segment.confidence,
+          reasonCode: segment.reason_code,
+        },
+        geometry: segment.geometry,
+      })),
+      visible: Boolean(auditData && showActualRoute),
+      pickable: false,
+      stroked: true,
+      filled: false,
+      getLineColor: [255, 125, 45, 245],
+      getLineWidth: 4,
+      lineWidthMinPixels: 2,
+    });
+
+    overlayRef.current?.setProps({
+      layers: [h3Layer, plannedLayer, actualLayer],
+    });
+  }, [auditData, cells, onHover, showActualRoute, showPlannedRoute, viewMode]);
 
   useEffect(() => {
     const map = mapRef.current;

@@ -10,6 +10,8 @@ class HeatmapFeatureProperties(BaseModel):
 
 
 class HeatmapFeaturePropertiesWithMetrics(HeatmapFeatureProperties):
+    hex_id: str | None = None
+    h3_resolution: int | None = Field(default=None, ge=9, le=12)
     bypass_trip_count: int = 0
     eligible_trip_count: int = 0
     unique_driver_count: int = 0

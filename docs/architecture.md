@@ -62,6 +62,17 @@ sample cells, avoiding gaps along the route. Records are deduplicated by H3 reso
 cell before persistence. Database inserts use `ON CONFLICT DO NOTHING`, so overlapping
 segments and worker retries contribute at most once per trip/route/hex/algorithm version.
 
+## Heatmap dashboard and route audit
+
+The dashboard queries the heatmap by time range, driver, and H3 resolution. Each GeoJSON
+feature includes its H3 identifier and resolution so the same filtered response drives the
+polygon, heat-blur, legend, and tooltip views. Driver filtering falls back to a live
+`trip_route_hexes`/`trips` aggregate because `h3_aggregates` has no driver dimension.
+
+Route Audit loads `/api/v1/trips/{trip_id}/route-comparison` on demand. Planned and matched
+geometries are independent Deck.gl layers, allowing either route to be hidden without
+changing the underlying comparison result.
+
 ## Data model
 
 `drivers` own `trips`; each trip has versioned `planned_routes` and immutable `gps_events`.
