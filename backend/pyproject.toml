@@ -9,7 +9,7 @@ description = "Foundation API for Route Deviation Heatmap Analytics"
 requires-python = ">=3.12"
 dependencies = [
   "alembic==1.14.1",
-  "fastapi==0.115.8",
+  "fastapi==0.140.7",
   "geoalchemy2==0.17.0",
   "httpx==0.28.1",
   "psycopg[binary]==3.2.4",
